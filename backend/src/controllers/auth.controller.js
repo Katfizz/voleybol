@@ -1,5 +1,28 @@
 const { response } = require('express');
 const authService = require('../services/auth.service');
+const { AppError } = require('../utils/errors');
+
+/**
+ * Manejador de errores centralizado para el controlador.
+ * @param {response} res - El objeto de respuesta de Express.
+ * @param {Error} error - El error capturado.
+ */
+const handleHttpError = (res, error) => {
+    console.error("Error en la capa de autenticación:", error.message);
+
+    if (error instanceof AppError) {
+        return res.status(error.statusCode).json({
+            ok: false,
+            msg: error.message
+        });
+    }
+    
+    // Para cualquier otro tipo de error, devolver un 500 genérico.
+    return res.status(500).json({
+        ok: false,
+        msg: 'Ocurrió un error inesperado en el servidor.'
+    });
+};
 
 const register = async (req, res = response) => {
     try {
@@ -13,10 +36,7 @@ const register = async (req, res = response) => {
             token
         });
     } catch (error) {
-        res.status(500).json({
-            ok: false,
-            msg: error.message || 'Error al registrar el usuario'
-        });
+        handleHttpError(res, error);
     }
 };
 
@@ -32,10 +52,7 @@ const login = async (req, res = response) => {
             token
         });
     } catch (error) {
-        res.status(400).json({
-            ok: false,
-            msg: error.message || 'Error al iniciar sesión'
-        });
+        handleHttpError(res, error);
     }
 };
 
