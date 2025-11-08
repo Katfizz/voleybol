@@ -1,42 +1,37 @@
 const { response, request } = require('express');
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
 const { jwtSecret } = require('../config/config');
 
-const validateJWT = (req = request, res = response, next) => {
-    const token = req.header('Authorization');
+const prisma = new PrismaClient();
 
-    if (!token) {
+const validateJWT = async (req = request, res = response, next) => {
+    const authHeader = req.header('Authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({
             ok: false,
-            msg: 'Error de autenticación'
-        });
-    }
-
-    // Verificar que el token venga con el prefijo 'Bearer '
-    if (!token.startsWith('Bearer ')) {
-        return res.status(401).json({
-            ok: false,
-            msg: 'Error de autenticación'
+            msg: 'No hay token o el formato es incorrecto.'
         });
     }
 
     try {
-        // Quitar el prefijo 'Bearer ' para obtener el token puro
-        const tokenValue = token.split(' ')[1];
+        const token = authHeader.split(' ')[1];
+        const payload = jwt.verify(token, jwtSecret);
 
-        const payload = jwt.verify(
-            tokenValue,
-            jwtSecret
-        );
+        const user = await prisma.user.findUnique({ where: { id: payload.uid } });
 
-        // Adjuntar el payload (que contiene uid y name/email) al objeto request
-        req.uid = payload.uid;
-        req.name = payload.name;
+        if (!user) {
+            return res.status(401).json({ ok: false, msg: 'Token no válido - usuario no existe.' });
+        }
+
+        // Adjuntar el objeto de usuario completo a la request
+        req.user = user;
 
     } catch (error) {
         return res.status(401).json({
             ok: false,
-            msg: 'Token no válido'
+            msg: 'Token no válido.'
         });
     }
 
@@ -46,3 +41,4 @@ const validateJWT = (req = request, res = response, next) => {
 module.exports = {
     validateJWT
 }
+

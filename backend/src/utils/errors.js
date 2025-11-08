@@ -40,9 +40,20 @@ class BadRequestError extends AppError {
     }
 }
 
+/**
+ * Error para peticiones donde el usuario está autenticado pero no tiene permisos.
+ * HTTP Status Code: 403
+ */
+class ForbiddenError extends AppError {
+    constructor(message = 'No tienes permiso para realizar esta acción.') {
+        super(message, 403);
+    }
+}
+
 module.exports = {
     AppError,
     ConflictError,
     UnauthorizedError,
-    BadRequestError
+    BadRequestError,
+    ForbiddenError
 };

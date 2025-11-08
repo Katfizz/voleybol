@@ -2,14 +2,13 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/config');
-const { ConflictError, UnauthorizedError } = require('../utils/errors');
+const { ConflictError, UnauthorizedError, ForbiddenError } = require('../utils/errors');
 
 const prisma = new PrismaClient();
 
 const generateJWT = (uid, name) => {
     return new Promise((resolve, reject) => {
         const payload = { uid, name };
-        // Corregido: Usar '2h' directamente como se hizo originalmente.
         jwt.sign(payload, jwtSecret, { expiresIn: '2h' }, (err, token) => {
             if (err) {
                 console.log(err);
@@ -20,7 +19,29 @@ const generateJWT = (uid, name) => {
     });
 };
 
-const registerUser = async ({ email, password, role }) => {
+const registerUser = async (newUserData, requestingUser) => {
+    const { email, password, role: roleToCreate } = newUserData;
+    const { role: requesterRole } = requestingUser;
+
+    // Regla 1: Prohibir la creación de ADMIN a través de la API
+    if (roleToCreate === 'ADMIN') {
+        throw new ForbiddenError('La creación de administradores no está permitida a través de la API.');
+    }
+
+    // Regla 2: Solo un ADMIN puede crear un COACH
+    if (roleToCreate === 'COACH') {
+        if (requesterRole !== 'ADMIN') {
+            throw new ForbiddenError('Solo un administrador puede crear un Entrenador.');
+        }
+    }
+
+    // Regla 3: Solo ADMIN o COACH pueden crear un PLAYER
+    if (roleToCreate === 'PLAYER') {
+        if (requesterRole !== 'ADMIN' && requesterRole !== 'COACH') {
+            throw new ForbiddenError('Solo un Administrador o Entrenador puede crear un Jugador.');
+        }
+    }
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
         throw new ConflictError('El correo electrónico ya está en uso');
@@ -30,21 +51,19 @@ const registerUser = async ({ email, password, role }) => {
     const password_hash = bcrypt.hashSync(password, salt);
 
     const newUser = await prisma.user.create({ 
-        data: { email, password_hash, role }
+        data: { email, password_hash, role: roleToCreate }
     });
 
-    const token = await generateJWT(newUser.id, newUser.email);
-
-    // No enviar el hash de la contraseña al cliente
+    // No devolver el hash de la contraseña
     const { password_hash: _, ...user } = newUser;
 
-    return { user, token };
+    // La función ya no devuelve un token, solo el usuario creado.
+    return { user };
 };
 
 const loginUser = async ({ email, password }) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-        // Usar el mismo error para no dar pistas sobre si el email existe o no.
         throw new UnauthorizedError('Credenciales no válidas');
     }
 
@@ -55,7 +74,6 @@ const loginUser = async ({ email, password }) => {
 
     const token = await generateJWT(user.id, user.email);
     
-    // No enviar el hash de la contraseña al cliente
     const { password_hash: _, ...userResponse } = user;
 
     return { user: userResponse, token };
