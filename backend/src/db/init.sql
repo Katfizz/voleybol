@@ -1,0 +1,1 @@
+-- This file is no longer in use. Database schema is now managed by Prisma in the /prisma/schema.prisma file.

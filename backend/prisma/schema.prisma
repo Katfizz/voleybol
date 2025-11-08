@@ -1,0 +1,110 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --------------------------------------
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  role          Role
+  created_at    DateTime @default(now())
+
+  profile        PlayerProfile? // Relation to player profile
+  announcements  Announcement[] // Relation to announcements authored by this user
+
+  @@map("users")
+}
+
+model PlayerProfile {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id      Int      @unique
+  full_name    String
+  birth_date   DateTime? @db.Date
+  contact_info String?
+  position     String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  attendances  Attendance[] // Relation to attendances
+  statistics   Statistic[]  // Relation to statistics
+
+  @@map("player_profiles")
+}
+
+model Announcement {
+  id         Int      @id @default(autoincrement())
+  author     User     @relation(fields: [author_id], references: [id])
+  author_id  Int
+  title      String
+  content    String
+  created_at DateTime @default(now())
+
+  @@map("announcements")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  type        EventType
+  date_time   DateTime
+  location    String?
+  description String?
+  created_at  DateTime @default(now())
+
+  attendances Attendance[] // Relation to attendances
+  statistics  Statistic[]  // Relation to statistics
+
+  @@map("events")
+}
+
+model Attendance {
+  id                Int           @id @default(autoincrement())
+  player_profile    PlayerProfile @relation(fields: [player_profile_id], references: [id])
+  player_profile_id Int
+  event             Event         @relation(fields: [event_id], references: [id])
+  event_id          Int
+  status            AttendanceStatus
+
+  @@unique([player_profile_id, event_id])
+  @@map("attendances")
+}
+
+model Statistic {
+  id                Int           @id @default(autoincrement())
+  player_profile    PlayerProfile @relation(fields: [player_profile_id], references: [id])
+  player_profile_id Int
+  event             Event?        @relation(fields: [event_id], references: [id])
+  event_id          Int?
+  stat_type         String
+  value             Decimal
+  notes             String?
+  created_at        DateTime      @default(now())
+
+  @@map("statistics")
+}
+
+// --- Enums ---
+
+enum Role {
+  ADMIN
+  COACH
+  PLAYER
+}
+
+enum EventType {
+  MATCH
+  PRACTICE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+}

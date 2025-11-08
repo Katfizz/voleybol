@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App de Voleibol - Autenticación</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f9; color: #333; display: grid; place-content: center; min-height: 100vh; margin: 0; }
+        .container { width: 400px; padding: 2rem; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; color: #1a2b4d; }
+        form { display: flex; flex-direction: column; gap: 1rem; }
+        input, select, button { padding: 0.8rem; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem; }
+        button { background-color: #0056b3; color: white; border: none; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #004494; }
+        .auth-forms { display: block; }
+        .logged-in-view { display: none; }
+        #message { text-align: center; padding: 1rem; margin-top: 1rem; border-radius: 4px; display: none; }
+        #message.success { background-color: #d4edda; color: #155724; }
+        #message.error { background-color: #f8d7da; color: #721c24; }
+        #user-info { background-color: #e9ecef; padding: 1rem; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- VISTA DE FORMULARIOS (NO AUTENTICADO) -->
+        <div id="auth-view">
+            <h1>Club de Voleibol</h1>
+            
+            <!-- Formulario de Registro -->
+            <div id="register-form-container">
+                <h2>Registro</h2>
+                <form id="register-form">
+                    <input type="email" id="register-email" placeholder="Correo Electrónico" required>
+                    <input type="password" id="register-password" placeholder="Contraseña" required minlength="6">
+                    <select id="register-role" required>
+                        <option value="PLAYER" selected>Jugador</option>
+                        <option value="COACH">Entrenador</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                    <button type="submit">Registrarse</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">¿Ya tienes cuenta? <a href="#" id="show-login">Inicia Sesión</a></p>
+            </div>
+
+            <!-- Formulario de Login -->
+            <div id="login-form-container" style="display: none;">
+                <h2>Iniciar Sesión</h2>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Correo Electrónico" required>
+                    <input type="password" id="login-password" placeholder="Contraseña" required>
+                    <button type="submit">Entrar</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">¿No tienes cuenta? <a href="#" id="show-register">Regístrate</a></p>
+            </div>
+        </div>
+
+        <!-- VISTA DE USUARIO AUTENTICADO -->
+        <div id="logged-in-view" class="logged-in-view">
+            <h2>Bienvenido</h2>
+            <div id="user-info"></div>
+            <button id="logout-button" style="width: 100%; margin-top: 1rem;">Cerrar Sesión</button>
+        </div>
+
+        <!-- Contenedor de Mensajes -->
+        <div id="message"></div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
