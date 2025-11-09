@@ -1,9 +1,6 @@
 const { response, request } = require('express');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
-const { jwtSecret } = require('../config/config');
-
-const prisma = new PrismaClient();
+const prisma = require('../db/prisma');
 
 const validateJWT = async (req = request, res = response, next) => {
     const authHeader = req.header('Authorization');
@@ -17,7 +14,7 @@ const validateJWT = async (req = request, res = response, next) => {
 
     try {
         const token = authHeader.split(' ')[1];
-        const payload = jwt.verify(token, jwtSecret);
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
 
         const user = await prisma.user.findUnique({ where: { id: payload.uid } });
 
@@ -41,4 +38,3 @@ const validateJWT = async (req = request, res = response, next) => {
 module.exports = {
     validateJWT
 }
-
