@@ -2,6 +2,12 @@ const { check } = require('express-validator');
 const { validateFields } = require('./validate-fields');
 const { Role } = require('@prisma/client');
 
+const baseUserValidation = [
+    check('birth_date', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
+    check('contact_info', 'La información de contacto debe ser una cadena de texto').optional().isString(),
+    check('position', 'La posición debe ser una cadena de texto').optional().isString(),
+];
+
 const userCreationValidation = [
     check('email', 'El email no es válido').isEmail(),
     check('password', 'El password debe de ser de 6 caracteres').isLength({ min: 6 }),
@@ -12,9 +18,7 @@ const userCreationValidation = [
         }
         return true;
     }),
-    check('birth_date', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
-    check('contact_info', 'La información de contacto debe ser una cadena de texto').optional().isString(),
-    check('position', 'La posición debe ser una cadena de texto').optional().isString(),
+    ...baseUserValidation,
     validateFields
 ];
 
@@ -28,9 +32,7 @@ const userUpdateValidation = [
         }
         return true;
     }),
-    check('birth_date', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
-    check('contact_info', 'La información de contacto debe ser una cadena de texto').optional().isString(),
-    check('position', 'La posición debe ser una cadena de texto').optional().isString(),
+    ...baseUserValidation,
     validateFields
 ];
 

@@ -1,12 +1,9 @@
 const { response, request } = require('express');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../db/prisma');
 const { AppError } = require('../utils/errors');
 const { Role } = require('@prisma/client');
 
-const prisma = new PrismaClient();
-
-// From validate-jwt.js
 const validateJWT = async (req = request, res = response, next) => {
     const authHeader = req.header('Authorization');
 
@@ -40,7 +37,6 @@ const validateJWT = async (req = request, res = response, next) => {
     next();
 };
 
-// From validate-role.js
 /**
  * Middleware para verificar si el usuario autenticado tiene permiso para crear un nuevo usuario con un rol específico.
  * @param {Request} req - El objeto de solicitud de Express.
@@ -73,61 +69,32 @@ const canCreateUser = (req, res = response, next) => {
 };
 
 /**
- * Middleware para verificar si el usuario autenticado tiene el rol de ADMIN.
- * @param {Request} req - El objeto de solicitud de Express.
- * @param {Response} res - El objeto de respuesta de Express.
- * @param {Function} next - La función de middleware siguiente.
+ * Middleware para verificar si el usuario autenticado tiene uno de los roles permitidos.
+ * @param  {...Role} allowedRoles - Los roles permitidos para acceder a la ruta.
  */
-const isAdminRole = (req, res = response, next) => {
-    if (!req.user) {
-        return res.status(500).json({
-            ok: false,
-            msg: 'Se quiere verificar el rol sin validar el token primero.'
-        });
+const hasRole = (...allowedRoles) => {
+    return (req, res = response, next) => {
+        if (!req.user) {
+            return res.status(500).json({
+                ok: false,
+                msg: 'Se quiere verificar el rol sin validar el token primero.'
+            });
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({
+                ok: false,
+                msg: `El servicio requiere uno de estos roles: ${allowedRoles.join(', ')}`
+            });
+        }
+
+        next();
     }
-
-    const { role } = req.user;
-
-    if (role !== Role.ADMIN) {
-        return res.status(403).json({
-            ok: false,
-            msg: `Operación no permitida. Se requiere rol de ${Role.ADMIN}.`
-        });
-    }
-
-    next();
-};
-
-/**
- * Middleware para verificar si el usuario autenticado tiene el rol de ADMIN o COACH.
- * @param {Request} req - El objeto de solicitud de Express.
- * @param {Response} res - El objeto de respuesta de Express.
- * @param {Function} next - La función de middleware siguiente.
- */
-const isAdminOrCoachRole = (req, res = response, next) => {
-    if (!req.user) {
-        return res.status(500).json({
-            ok: false,
-            msg: 'Se quiere verificar el rol sin validar el token primero.'
-        });
-    }
-
-    const { role } = req.user;
-
-    if (role !== Role.ADMIN && role !== Role.COACH) {
-        return res.status(403).json({
-            ok: false,
-            msg: `Operación no permitida. Se requiere rol de ${Role.ADMIN} o ${Role.COACH}.`
-        });
-    }
-
-    next();
-};
+}
 
 
 module.exports = {
     validateJWT,
     canCreateUser,
-    isAdminRole,
-    isAdminOrCoachRole
+    hasRole
 };
