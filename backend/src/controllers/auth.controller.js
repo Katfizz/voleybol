@@ -24,22 +24,6 @@ const handleHttpError = (res, error) => {
     });
 };
 
-const register = async (req, res = response) => {
-    try {
-        // req.user es el usuario que hace la petición (obtenido del JWT)
-        // req.body contiene los datos del nuevo usuario a crear
-        const { user } = await authService.registerUser(req.body, req.user);
-
-        res.status(201).json({
-            ok: true,
-            msg: 'Usuario creado exitosamente por un administrador.',
-            user
-        });
-    } catch (error) {
-        handleHttpError(res, error);
-    }
-};
-
 const login = async (req, res = response) => {
     try {
         const { email, password } = req.body;
@@ -57,6 +41,5 @@ const login = async (req, res = response) => {
 };
 
 module.exports = {
-    register,
     login
 };
