@@ -23,18 +23,19 @@ model User {
 }
 
 model PlayerProfile {
-  id           Int      @id @default(autoincrement())
-  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id      Int      @unique
-  full_name    String
-  birth_date   DateTime? @db.Date
-  contact_info String?
-  position     String?
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id                  Int       @id @default(autoincrement())
+  user                User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id             Int       @unique
+  full_name           String
+  birth_date          DateTime? @db.Date
+  position            String?
+  contact_data        Json? // contact_data
+  representative_data Json? // parents_data
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
 
-  attendances  Attendance[] // Relation to attendances
-  statistics   Statistic[]  // Relation to statistics
+  attendances Attendance[] // Relation to attendances
+  statistics  Statistic[]  // Relation to statistics
 
   @@map("player_profiles")
 }

@@ -84,7 +84,7 @@ const hasRole = (...allowedRoles) => {
         if (!allowedRoles.includes(req.user.role)) {
             return res.status(403).json({
                 ok: false,
-                msg: `El servicio requiere uno de estos roles: ${allowedRoles.join(', ')}`
+                msg: `Servicio prohibido`
             });
         }
 
