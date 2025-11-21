@@ -4,7 +4,7 @@ const { Role } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
 const createUser = async (userData, requestingUser) => {
-    const { email, password, role, full_name, birth_date, contact_info, position } = userData;
+    const { email, password, role } = userData;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -24,34 +24,50 @@ const createUser = async (userData, requestingUser) => {
         });
 
         if (user.role === Role.PLAYER) {
+            const { profile } = userData;
+            if (!profile) {
+                throw new AppError('El perfil es requerido para el rol de jugador', 400);
+            }
+            
+            const { firstName, lastName, birthDate, contact, representativeData } = profile;
             await tx.playerProfile.create({
                 data: {
-                    userId: user.id,
-                    full_name: full_name || 'N/A',
-                    birth_date: birth_date ? new Date(birth_date) : null,
-                    contact_info: contact_info || null,
-                    position: position || null,
+                    user: {
+                        connect: { id: user.id }
+                    },
+                    full_name: `${firstName} ${lastName}`,
+                    birth_date: birthDate ? new Date(birthDate) : null,
+                    contact_data: contact ? { create: contact } : undefined,
+                    representative_data: representativeData ? { create: representativeData } : undefined
                 }
             });
         }
-        return user;
+        
+        // Devolver el usuario sin la contraseña
+        const { password_hash, ...userResponse } = user;
+        return userResponse;
     });
 
-    return await getUserById(newUser.id);
+    return newUser;
 }
 
 const getAllUsers = async () => {
     return await prisma.user.findMany({
-        include: {
-            playerProfile: true
-        },
         select: {
             id: true,
             email: true,
             role: true,
-            createdAt: true,
-            updatedAt: true,
-            playerProfile: true
+            created_at: true,
+            profile: {
+                select: {
+                    id: true,
+                    full_name: true,
+                    birth_date: true,
+                    position: true,
+                    contact_data: true,
+                    representative_data: true
+                }
+            }
         }
     });
 };
