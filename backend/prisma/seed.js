@@ -1,13 +1,11 @@
 const { PrismaClient, Role } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const config = require('../src/config/config'); // Importar la configuración central
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const { adminEmail, adminPassword } = config;
 
   if (!adminEmail || !adminPassword) {
     console.error(

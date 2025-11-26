@@ -3,11 +3,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { ConflictError, UnauthorizedError, ForbiddenError, AppError } = require('../utils/errors');
 const prisma = require('../db/prisma');
+const config = require('../config/config'); // Importar la configuración
 
 const generateJWT = (uid, email) => { // Changed name to email for consistency
     return new Promise((resolve, reject) => {
         const payload = { uid, email }; // Changed name to email for consistency
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2h' }, (err, token) => {
+        jwt.sign(payload, config.jwtSecret, { expiresIn: config.tokenExpiration }, (err, token) => { // Usar config.jwtSecret y config.tokenExpiration
             if (err) {
                 console.log(err);
                 reject('No se pudo generar el token');
