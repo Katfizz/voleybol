@@ -2,6 +2,7 @@ const { response, request } = require('express');
 const jwt = require('jsonwebtoken');
 const prisma = require('../db/prisma');
 const { AppError } = require('../utils/errors');
+const config = require('../config/config'); // Importar la configuración
 const { Role } = require('@prisma/client');
 
 const validateJWT = async (req = request, res = response, next) => {
@@ -16,7 +17,7 @@ const validateJWT = async (req = request, res = response, next) => {
 
     try {
         const token = authHeader.split(' ')[1];
-        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        const payload = jwt.verify(token, config.jwtSecret); // Usar config.jwtSecret
 
         const user = await prisma.user.findUnique({ where: { id: payload.uid } });
 
@@ -84,7 +85,7 @@ const hasRole = (...allowedRoles) => {
         if (!allowedRoles.includes(req.user.role)) {
             return res.status(403).json({
                 ok: false,
-                msg: `El servicio requiere uno de estos roles: ${allowedRoles.join(', ')}`
+                msg: `Servicio prohibido`
             });
         }
 

@@ -10,7 +10,7 @@ router.get('/', [
     hasRole(Role.ADMIN),
 ], userController.getAllUsers);
 
-// POST create user
+// POST create user - This route is disabled and moved to /api/auth/register
 router.post('/', [
     validateJWT,
     canCreateUser,
