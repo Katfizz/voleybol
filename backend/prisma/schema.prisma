@@ -19,6 +19,9 @@ model User {
   profile        PlayerProfile? // Relation to player profile
   announcements  Announcement[] // Relation to announcements authored by this user
 
+  // Relación muchos a muchos: Un coach puede gestionar varias categorías
+  managedCategories Category[] @relation("CoachToCategory")
+
   @@map("users")
 }
 
@@ -33,6 +36,9 @@ model PlayerProfile {
   representative_data Json? // parents_data
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
+
+  // Relación muchos a muchos: Un jugador puede estar en varias categorías
+  categories Category[] @relation("PlayerProfileToCategory")
 
   attendances Attendance[] // Relation to attendances
   statistics  Statistic[]  // Relation to statistics
@@ -89,6 +95,20 @@ model Statistic {
   created_at        DateTime      @default(now())
 
   @@map("statistics")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+
+  // Relaciones muchos a muchos
+  playerProfiles PlayerProfile[] @relation("PlayerProfileToCategory")
+  coaches        User[]          @relation("CoachToCategory")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  @@map("categories")
 }
 
 // --- Enums ---
