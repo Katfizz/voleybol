@@ -38,7 +38,60 @@ const assignPlayerController = async (req = request, res = response, next) => {
     }
 };
 
+const getAllCategoriesController = async (req = request, res = response, next) => {
+    try {
+        const categories = await categoryService.getAllCategories();
+        res.status(200).json({
+            ok: true,
+            categories,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getCategoryByIdController = async (req = request, res = response, next) => {
+    try {
+        const { id } = req.params;
+        const category = await categoryService.getCategoryById(id);
+        res.status(200).json({
+            ok: true,
+            category,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const updateCategoryController = async (req = request, res = response, next) => {
+    try {
+        const { id } = req.params;
+        const updatedCategory = await categoryService.updateCategory(id, req.body);
+        res.status(200).json({
+            ok: true,
+            msg: 'Categoría actualizada exitosamente.',
+            category: updatedCategory,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deleteCategoryController = async (req = request, res = response, next) => {
+    try {
+        const { id } = req.params;
+        await categoryService.deleteCategory(id);
+        res.status(200).json({ ok: true, msg: 'Categoría eliminada exitosamente.' });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createCategoryController,
     assignPlayerController,
+    getAllCategoriesController,
+    getCategoryByIdController,
+    updateCategoryController,
+    deleteCategoryController,
 };

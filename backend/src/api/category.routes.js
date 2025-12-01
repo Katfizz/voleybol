@@ -1,12 +1,28 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { validateFields, validateJWT } = require('../middlewares');
-const { createCategoryController, assignPlayerController } = require('../controllers/category.controller');
+const { validateFields, validateJWT, hasRole } = require('../middlewares');
+const {
+    createCategoryController,
+    assignPlayerController,
+    getAllCategoriesController,
+    getCategoryByIdController,
+    updateCategoryController,
+    deleteCategoryController,
+} = require('../controllers/category.controller');
+const { Role } = require('@prisma/client');
 
 const router = Router();
 
 // Middleware para todas las rutas de este archivo
 router.use(validateJWT);
+
+// GET todas las categorías
+router.get('/', getAllCategoriesController);
+
+// GET una categoría por ID
+router.get('/:id', [
+    check('id', 'El ID debe ser un número entero').isInt(), validateFields
+], getCategoryByIdController);
 
 // Crear una nueva categoría (ADMIN, COACH)
 router.post(
@@ -27,5 +43,21 @@ router.post(
     ],
     assignPlayerController
 );
+
+// PUT actualizar una categoría (Solo ADMIN para evitar inconsistencias)
+router.put('/:id', [
+    hasRole(Role.ADMIN, Role.COACH),
+    check('id', 'El ID debe ser un número entero').isInt(),
+    check('name', 'El nombre debe ser un texto').optional().isString(),
+    validateFields,
+], updateCategoryController);
+
+// DELETE una categoría (Solo ADMIN)
+router.delete('/:id', [
+    hasRole(Role.ADMIN, Role.COACH),
+    check('id', 'El ID debe ser un número entero').isInt(),
+    validateFields,
+], deleteCategoryController);
+
 
 module.exports = router;

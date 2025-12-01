@@ -64,7 +64,69 @@ const assignPlayerToCategory = async (categoryId, playerId, requestingUser) => {
     });
 };
 
+/**
+ * Obtiene todas las categorías.
+ * @returns {Promise<Array<object>>} Un arreglo de todas las categorías.
+ */
+const getAllCategories = async () => {
+    return prisma.category.findMany({
+        include: {
+            _count: { // Contar cuántos jugadores y coaches hay en cada categoría
+                select: { playerProfiles: true, coaches: true },
+            },
+        },
+    });
+};
+
+/**
+ * Obtiene una categoría por su ID.
+ * @param {string} categoryId - El ID de la categoría.
+ * @returns {Promise<object>} La categoría encontrada.
+ */
+const getCategoryById = async (categoryId) => {
+    const id = parseInt(categoryId, 10);
+    const category = await prisma.category.findUnique({
+        where: { id },
+        include: { // Incluir los perfiles de jugadores y los coaches asociados
+            playerProfiles: { include: { user: { select: { id: true, email: true, role: true } } } },
+            coaches: { select: { id: true, email: true, role: true } },
+        },
+    });
+
+    if (!category) {
+        throw new NotFoundError(`No se encontró una categoría con el ID ${id}.`);
+    }
+    return category;
+};
+
+/**
+ * Actualiza una categoría.
+ * @param {string} categoryId - El ID de la categoría a actualizar.
+ * @param {object} dataToUpdate - Los datos a actualizar (name, description).
+ * @returns {Promise<object>} La categoría actualizada.
+ */
+const updateCategory = async (categoryId, dataToUpdate) => {
+    const id = parseInt(categoryId, 10);
+    return prisma.category.update({
+        where: { id },
+        data: dataToUpdate,
+    });
+};
+
+/**
+ * Elimina una categoría por su ID.
+ * @param {string} categoryId - El ID de la categoría a eliminar.
+ */
+const deleteCategory = async (categoryId) => {
+    const id = parseInt(categoryId, 10);
+    return prisma.category.delete({ where: { id } });
+};
+
 module.exports = {
     createCategory,
     assignPlayerToCategory,
+    getAllCategories,
+    getCategoryById,
+    updateCategory,
+    deleteCategory,
 };
