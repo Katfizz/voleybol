@@ -165,3 +165,134 @@ Devuelve el perfil del jugador asociado al token de autenticación.
         "position": null
     }
     ```
+
+---
+
+## Recurso: Categorías (`/categories`)
+
+Este recurso permite a los `ADMIN` y `COACH` gestionar las categorías o equipos.
+
+### `GET /categories`
+
+Devuelve una lista de todas las categorías existentes.
+
+*   **Permisos:** `ADMIN`, `COACH`
+*   **Request Body:** Ninguno.
+*   **Respuesta Exitosa (200 OK):**
+
+    ```json
+    {
+        "ok": true,
+        "categories": [
+            {
+                "id": 1,
+                "name": "Sub-17 Femenino",
+                "description": "Equipo de competencia regional.",
+                "_count": {
+                    "playerProfiles": 12,
+                    "coaches": 1
+                }
+            },
+            {
+                "id": 2,
+                "name": "Libre Masculino",
+                "description": null,
+                "_count": {
+                    "playerProfiles": 15,
+                    "coaches": 2
+                }
+            }
+        ]
+    }
+    ```
+
+### `GET /categories/:id`
+
+Devuelve una categoría específica, incluyendo los perfiles de los jugadores y los coaches asociados.
+
+*   **Permisos:** `ADMIN`, `COACH`
+*   **Request Body:** Ninguno.
+
+### `POST /categories`
+
+Crea una nueva categoría.
+
+*   **Permisos:** `ADMIN`, `COACH`
+*   **Request Body:**
+
+    ```json
+    {
+        "name": "Sub-19 Masculino",
+        "description": "Equipo para el torneo nacional."
+    }
+    ```
+
+*   **Respuesta Exitosa (201 Created):**
+
+    ```json
+    {
+        "ok": true,
+        "msg": "Categoría creada exitosamente.",
+        "category": {
+            "id": 3,
+            "name": "Sub-19 Masculino",
+            "description": "Equipo para el torneo nacional."
+        }
+    }
+    ```
+
+### `POST /categories/:id/players`
+
+Asigna un jugador existente a una categoría.
+
+*   **Permisos:** `ADMIN`, `COACH`
+*   **Request Body:**
+
+    ```json
+    {
+        "playerId": 15
+    }
+    ```
+
+*   **Respuesta Exitosa (200 OK):**
+
+    ```json
+    {
+        "ok": true,
+        "msg": "Jugador asignado a la categoría 'Sub-19 Masculino' exitosamente.",
+        "category": {
+            "id": 3,
+            "name": "Sub-19 Masculino",
+            "playerProfiles": [ /* ...lista actualizada de perfiles... */ ]
+        }
+    }
+    ```
+
+### `PUT /categories/:id`
+
+Actualiza el nombre o la descripción de una categoría.
+
+*   **Permisos:** `ADMIN`, `COACH`
+*   **Request Body:**
+
+    ```json
+    {
+        "name": "Sub-19 Varonil",
+        "description": "Equipo actualizado para el torneo nacional."
+    }
+    ```
+
+### `DELETE /categories/:id`
+
+Elimina una categoría del sistema.
+
+*   **Permisos:** `ADMIN`, `COACH`
+*   **Request Body:** Ninguno.
+*   **Respuesta Exitosa (200 OK):**
+
+    ```json
+    {
+        "ok": true,
+        "msg": "Categoría eliminada exitosamente."
+    }
+    ```

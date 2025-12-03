@@ -40,28 +40,29 @@ const assignPlayerToCategory = async (categoryId, playerId, requestingUser) => {
         throw new ForbiddenError('No tienes permiso para asignar jugadores.');
     }
 
-    // Validar que el usuario a asignar tenga un perfil de jugador
-    const playerProfile = await prisma.playerProfile.findUnique({ where: { user_id: pId } });
-    if (!playerProfile) {
-        throw new NotFoundError(`No se encontró un perfil de jugador para el usuario con ID ${pId}.`);
+    // Usar una actualización anidada para que Prisma maneje la conexión de forma atómica.
+    // Si no encuentra un playerProfile con el user_id: pId, la operación fallará.
+    try {
+        return await prisma.category.update({
+            where: { id: catId },
+            data: {
+                playerProfiles: {
+                    connect: { user_id: pId },
+                },
+            },
+            include: {
+                playerProfiles: {
+                    include: {
+                        user: { select: { id: true, email: true } }, // Incluir datos básicos del usuario
+                    },
+                },
+            },
+        });
+    } catch (error) {
+        // Capturamos el error de Prisma si no encuentra el perfil y devolvemos un mensaje más claro.
+        // Esto es más robusto que hacer dos consultas separadas.
+        throw new NotFoundError(`No se pudo asignar el jugador. Asegúrate de que la categoría con ID ${catId} y el jugador con ID ${pId} (con perfil) existan.`);
     }
-
-    // Conectar el perfil del jugador a la categoría
-    return prisma.category.update({
-        where: { id: catId },
-        data: {
-            playerProfiles: {
-                connect: { id: playerProfile.id },
-            },
-        },
-        include: {
-            playerProfiles: {
-                include: {
-                    user: { select: { id: true, email: true } } // Incluir datos básicos del usuario
-                }
-            },
-        },
-    });
 };
 
 /**
