@@ -14,7 +14,7 @@ const createUser = async (userData, requestingUser) => {
     const salt = bcrypt.genSaltSync();
     const hashedPassword = bcrypt.hashSync(password, salt);
 
-    const newUser = await prisma.$transaction(async (tx) => {
+    const createdUser = await prisma.$transaction(async (tx) => {
         const user = await tx.user.create({
             data: {
                 email,
@@ -37,18 +37,43 @@ const createUser = async (userData, requestingUser) => {
                     },
                     full_name: `${firstName} ${lastName}`,
                     birth_date: birthDate ? new Date(birthDate) : null,
-                    contact_data: contact ? { create: contact } : undefined,
-                    representative_data: representativeData ? { create: representativeData } : undefined
+                    contact_data: contact || undefined, // Guardar el objeto JSON directamente
+                    representative_data: representativeData || undefined // Guardar el objeto JSON directamente
                 }
             });
         }
         
-        // Devolver el usuario sin la contraseña
-        const { password_hash, ...userResponse } = user;
-        return userResponse;
+        return user; // Devolvemos el usuario completo de la transacción
     });
 
-    return newUser;
+    // ¡Esta es la corrección clave!
+    // Después de la transacción, volvemos a consultar el usuario por su ID para obtener
+    // el objeto completo con todas las relaciones anidadas correctamente formateadas.
+    const userWithProfile = await prisma.user.findUnique({
+        where: { id: createdUser.id },
+        select: {
+            id: true,
+            email: true,
+            role: true,
+            created_at: true,
+            profile: {
+                // Incluimos el perfil y sus datos anidados
+                select: {
+                    id: true,
+                    full_name: true,
+                    birth_date: true,
+                    position: true,
+                    contact_data: true,
+                    representative_data: true,
+                    user_id: true,    // Añadido si lo necesitas
+                    created_at: true, // Añadido si lo necesitas
+                    updated_at: true, // Añadido si lo necesitas
+                },
+            },
+        },
+    });
+
+    return userWithProfile;
 }
 
 const getAllUsers = async () => {
@@ -58,6 +83,7 @@ const getAllUsers = async () => {
             email: true,
             role: true,
             created_at: true,
+            updated_at: true,
             profile: {
                 select: {
                     id: true,
@@ -80,16 +106,22 @@ const getUserById = async (id) => {
 
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        include: {
-            playerProfile: true
-        },
         select: {
             id: true,
             email: true,
             role: true,
-            createdAt: true,
-            updatedAt: true,
-            playerProfile: true
+            created_at: true,
+            updated_at: true,
+            profile: { // Usar el nombre de relación correcto 'profile'
+                select: {
+                    id: true,
+                    full_name: true,
+                    birth_date: true,
+                    position: true,
+                    contact_data: true,
+                    representative_data: true,
+                }
+            }
         }
     });
 
@@ -100,7 +132,7 @@ const getUserById = async (id) => {
 };
 
 const updateUser = async (id, userData, requestingUser) => {
-    const { email, password, role, full_name, birth_date, contact_info, position } = userData;
+    const { email, password, role, profile } = userData;
 
     const userToUpdate = await prisma.user.findUnique({ where: { id: parseInt(id) } });
     if (!userToUpdate) {
@@ -143,26 +175,29 @@ const updateUser = async (id, userData, requestingUser) => {
         const finalRole = role || userToUpdate.role;
 
         if (finalRole === Role.PLAYER) {
-            await tx.playerProfile.upsert({
-                where: { userId: user.id },
-                update: {
-                    full_name: full_name || undefined,
-                    birth_date: birth_date ? new Date(birth_date) : undefined,
-                    contact_info: contact_info || undefined,
-                    position: position || undefined,
-                },
-                create: {
-                    userId: user.id,
-                    full_name: full_name || 'N/A',
-                    birth_date: birth_date ? new Date(birth_date) : null,
-                    contact_info: contact_info || null,
-                    position: position || null,
-                }
-            });
+            if (!profile) {
+                // No hacer nada si no se envían datos del perfil para actualizar
+            } else {
+                const { firstName, lastName, birthDate, contact, representativeData, position } = profile;
+                await tx.playerProfile.upsert({
+                    where: { user_id: user.id },
+                    update: {
+                        full_name: (firstName && lastName) ? `${firstName} ${lastName}` : undefined,
+                        birth_date: birthDate ? new Date(birthDate) : undefined,
+                        contact_data: contact || undefined,
+                        representative_data: representativeData || undefined,
+                        position: position || undefined,
+                    },
+                    create: {
+                        user: { connect: { id: user.id } },
+                        full_name: (firstName && lastName) ? `${firstName} ${lastName}` : 'N/A',
+                    }
+                });
+            }
         } else if (userToUpdate.role === Role.PLAYER && finalRole !== Role.PLAYER) {
             // If the user was a PLAYER and is now something else, delete their profile.
-            await tx.playerProfile.deleteMany({
-                where: { userId: user.id }
+            await tx.playerProfile.deleteMany({ // Corregido aquí también
+                where: { user_id: user.id }
             });
         }
 
@@ -196,7 +231,7 @@ const deleteUser = async (id, requestingUser) => {
     await prisma.$transaction(async (tx) => {
         // Delete associated player profile first if it exists
         await tx.playerProfile.deleteMany({
-            where: { userId: userId }
+            where: { user_id: userId }
         });
 
         await tx.user.delete({

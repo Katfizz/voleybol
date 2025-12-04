@@ -1,89 +1,89 @@
-const { request, response } = require('express');
 const categoryService = require('../services/category.service');
+const { AppError } = require('../utils/errors');
 
-const createCategoryController = async (req = request, res = response, next) => {
+const createCategoryController = async (req, res) => {
     try {
-        const requestingUser = req.user; // Inyectado por validateJWT
-        const newCategory = await categoryService.createCategory(req.body, requestingUser);
-
+        const category = await categoryService.createCategory(req.body, req.user);
         res.status(201).json({
             ok: true,
             msg: 'Categoría creada exitosamente.',
-            category: newCategory,
+            category,
         });
     } catch (error) {
-        next(error);
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
     }
 };
 
-const assignPlayerController = async (req = request, res = response, next) => {
+const assignPlayerController = async (req, res) => {
     try {
-        const { id: categoryId } = req.params;
+        const { id } = req.params;
         const { playerId } = req.body;
-        const requestingUser = req.user;
-
-        if (!playerId) {
-            return res.status(400).json({ ok: false, msg: 'El campo "playerId" es obligatorio.' });
-        }
-
-        const updatedCategory = await categoryService.assignPlayerToCategory(categoryId, playerId, requestingUser);
-
-        res.status(200).json({
+        const updatedCategory = await categoryService.assignPlayerToCategory(id, playerId, req.user);
+        res.json({
             ok: true,
             msg: `Jugador asignado a la categoría '${updatedCategory.name}' exitosamente.`,
             category: updatedCategory,
         });
     } catch (error) {
-        next(error);
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
     }
 };
 
-const getAllCategoriesController = async (req = request, res = response, next) => {
+const getAllCategoriesController = async (req, res) => {
     try {
         const categories = await categoryService.getAllCategories();
-        res.status(200).json({
-            ok: true,
-            categories,
-        });
+        res.json({ ok: true, categories });
     } catch (error) {
-        next(error);
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
     }
 };
 
-const getCategoryByIdController = async (req = request, res = response, next) => {
+const getCategoryByIdController = async (req, res) => {
     try {
-        const { id } = req.params;
-        const category = await categoryService.getCategoryById(id);
-        res.status(200).json({
-            ok: true,
-            category,
-        });
+        const category = await categoryService.getCategoryById(req.params.id);
+        res.json({ ok: true, category });
     } catch (error) {
-        next(error);
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
     }
 };
 
-const updateCategoryController = async (req = request, res = response, next) => {
+const updateCategoryController = async (req, res) => {
+    try {
+        const category = await categoryService.updateCategory(req.params.id, req.body);
+        res.json({ ok: true, msg: 'Categoría actualizada exitosamente.', category });
+    } catch (error) {
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+    }
+};
+
+const deleteCategoryController = async (req, res) => {
+    try {
+        await categoryService.deleteCategory(req.params.id);
+        res.json({ ok: true, msg: 'Categoría eliminada exitosamente.' });
+    } catch (error) {
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+    }
+};
+
+const assignCoachController = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedCategory = await categoryService.updateCategory(id, req.body);
-        res.status(200).json({
+        const requestingUser = req.user;
+        const updatedCategory = await categoryService.assignCoachToCategory(id, requestingUser);
+        res.json({
             ok: true,
-            msg: 'Categoría actualizada exitosamente.',
+            msg: `Coach asignado exitosamente a la categoría '${updatedCategory.name}'.`,
             category: updatedCategory,
         });
     } catch (error) {
-        next(error);
-    }
-};
-
-const deleteCategoryController = async (req = request, res = response, next) => {
-    try {
-        const { id } = req.params;
-        await categoryService.deleteCategory(id);
-        res.status(200).json({ ok: true, msg: 'Categoría eliminada exitosamente.' });
-    } catch (error) {
-        next(error);
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
     }
 };
 
@@ -94,4 +94,5 @@ module.exports = {
     getCategoryByIdController,
     updateCategoryController,
     deleteCategoryController,
+    assignCoachController,
 };

@@ -3,6 +3,7 @@ const cors = require('cors');
 const userRoutes = require('./api/users.routes');
 const authRoutes = require('./api/auth.routes');
 const categoryRoutes = require('./api/category.routes');
+const profileRoutes = require('./api/profile.routes');
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/profile', profileRoutes);
 
 module.exports = app;

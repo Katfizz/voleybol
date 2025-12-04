@@ -268,6 +268,27 @@ Asigna un jugador existente a una categoría.
     }
     ```
 
+### `POST /categories/:id/manage`
+
+Permite a un `COACH` autenticado asignarse a sí mismo para gestionar una categoría.
+
+*   **Permisos:** `COACH`
+*   **Request Body:** Ninguno.
+*   **Respuesta Exitosa (200 OK):**
+
+    ```json
+    {
+        "ok": true,
+        "msg": "Coach asignado exitosamente a la categoría 'Sub-17 Femenino'.",
+        "category": {
+            "id": 1,
+            "name": "Sub-17 Femenino",
+            "description": "Equipo de competencia regional.",
+            "coaches": [ /* ...lista actualizada de coaches... */ ]
+        }
+    }
+    ```
+
 ### `PUT /categories/:id`
 
 Actualiza el nombre o la descripción de una categoría.

@@ -1,9 +1,13 @@
 const { Router } = require('express');
-const { getProfile } = require('../controllers/profile.controller');
-const { authRequired } = require('../middlewares/auth.middleware');
+const { validateJWT } = require('../middlewares');
+const { getProfileController } = require('../controllers/profile.controller');
 
 const router = Router();
 
-router.get('/profile', authRequired, getProfile);
+// Todas las rutas en este archivo requieren un token JWT válido.
+router.use(validateJWT);
+
+// GET /api/profile - Obtiene el perfil del usuario logueado.
+router.get('/', getProfileController);
 
 module.exports = router;

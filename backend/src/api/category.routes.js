@@ -8,6 +8,7 @@ const {
     getCategoryByIdController,
     updateCategoryController,
     deleteCategoryController,
+    assignCoachController, // Importar el nuevo controlador
 } = require('../controllers/category.controller');
 const { Role } = require('@prisma/client');
 
@@ -42,6 +43,17 @@ router.post(
         validateFields,
     ],
     assignPlayerController
+);
+
+// Asignar el coach logueado para gestionar una categoría (Solo COACH)
+router.post(
+    '/:id/manage',
+    [
+        hasRole(Role.COACH),
+        check('id', 'El ID de la categoría debe ser un número').isInt(),
+        validateFields,
+    ],
+    assignCoachController
 );
 
 // PUT actualizar una categoría (Solo ADMIN para evitar inconsistencias)
