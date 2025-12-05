@@ -74,11 +74,11 @@ const deleteCategoryController = async (req, res) => {
 const assignCoachController = async (req, res) => {
     try {
         const { id } = req.params;
-        const requestingUser = req.user;
-        const updatedCategory = await categoryService.assignCoachToCategory(id, requestingUser);
+        const { coachId } = req.body; // El ID del coach viene del body
+        const updatedCategory = await categoryService.assignCoachToCategory(id, coachId, req.user);
         res.json({
             ok: true,
-            msg: `Coach asignado exitosamente a la categoría '${updatedCategory.name}'.`,
+            msg: `Coach con ID ${coachId} asignado exitosamente a la categoría '${updatedCategory.name}'.`,
             category: updatedCategory,
         });
     } catch (error) {

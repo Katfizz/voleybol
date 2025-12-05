@@ -66,6 +66,45 @@ const assignPlayerToCategory = async (categoryId, playerId, requestingUser) => {
 };
 
 /**
+ * Asigna un coach a una categoría.
+ * Un ADMIN puede asignar a cualquier coach.
+ * Un COACH solo puede asignarse a sí mismo.
+ * @param {string} categoryId - El ID de la categoría.
+ * @param {string} coachId - El ID del usuario (coach) a asignar, proveniente del body.
+ * @param {object} requestingUser - El usuario autenticado que realiza la solicitud.
+ * @returns {Promise<object>} La categoría actualizada con la lista de coaches.
+ */
+const assignCoachToCategory = async (categoryId, coachId, requestingUser) => {
+    const catId = parseInt(categoryId, 10);
+    const cId = parseInt(coachId, 10);
+
+    // Regla de negocio: Un COACH solo puede asignarse a sí mismo.
+    if (requestingUser.role === Role.COACH && requestingUser.id !== cId) {
+        throw new ForbiddenError('No tienes permiso para asignar a otros coaches. Solo puedes asignarte a ti mismo.');
+    }
+
+    // Verificamos que el usuario a asignar sea realmente un COACH
+    const coachToAssign = await prisma.user.findFirst({ where: { id: cId, role: Role.COACH } });
+    if (!coachToAssign) {
+        throw new NotFoundError(`El usuario con ID ${cId} no existe o no tiene el rol de COACH.`);
+    }
+
+    try {
+        return await prisma.category.update({
+            where: { id: catId },
+            data: {
+                coaches: {
+                    connect: { id: cId }, // Conectar el coach a la categoría
+                },
+            },
+            include: { coaches: true }, // Devolver la lista actualizada de coaches
+        });
+    } catch (error) {
+        throw new NotFoundError(`No se pudo asignar el coach. Asegúrate de que la categoría con ID ${catId} exista.`);
+    }
+};
+
+/**
  * Obtiene todas las categorías.
  * @returns {Promise<Array<object>>} Un arreglo de todas las categorías.
  */
@@ -126,6 +165,7 @@ const deleteCategory = async (categoryId) => {
 module.exports = {
     createCategory,
     assignPlayerToCategory,
+    assignCoachToCategory,
     getAllCategories,
     getCategoryById,
     updateCategory,

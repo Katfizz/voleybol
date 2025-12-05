@@ -1,1 +1,0 @@
-// This file is no longer in use. Database connection is now managed by Prisma.

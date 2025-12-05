@@ -29,16 +29,16 @@ const createUser = async (userData, requestingUser) => {
                 throw new AppError('El perfil es requerido para el rol de jugador', 400);
             }
             
-            const { firstName, lastName, birthDate, contact, representativeData } = profile;
+            const { full_name, birthDate, contact_data, representative_data } = profile;
             await tx.playerProfile.create({
                 data: {
                     user: {
                         connect: { id: user.id }
                     },
-                    full_name: `${firstName} ${lastName}`,
-                    birth_date: birthDate ? new Date(birthDate) : null,
-                    contact_data: contact || undefined, // Guardar el objeto JSON directamente
-                    representative_data: representativeData || undefined // Guardar el objeto JSON directamente
+                    full_name: full_name,
+                    birth_date: birthDate ? new Date(birthDate) : undefined,
+                    contact_data: contact_data || undefined, // Guardar el objeto JSON directamente
+                    representative_data: representative_data || undefined // Guardar el objeto JSON directamente
                 }
             });
         }
@@ -56,6 +56,7 @@ const createUser = async (userData, requestingUser) => {
             email: true,
             role: true,
             created_at: true,
+            updated_at: true, // Asegurarse de que este campo esté en el modelo User
             profile: {
                 // Incluimos el perfil y sus datos anidados
                 select: {
@@ -65,9 +66,6 @@ const createUser = async (userData, requestingUser) => {
                     position: true,
                     contact_data: true,
                     representative_data: true,
-                    user_id: true,    // Añadido si lo necesitas
-                    created_at: true, // Añadido si lo necesitas
-                    updated_at: true, // Añadido si lo necesitas
                 },
             },
         },

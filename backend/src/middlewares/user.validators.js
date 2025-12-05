@@ -8,16 +8,25 @@ const userCreationValidation = [
     check('role', 'El rol no es válido').isIn([Role.ADMIN, Role.COACH, Role.PLAYER]),
     check('profile').custom((value, { req }) => {
         if (req.body.role === Role.PLAYER) {
-            if (!value || !value.firstName || !value.lastName) {
-                throw new Error('El perfil con nombre (firstName) y apellido (lastName) es obligatorio para los jugadores');
+            if (!value) {
+                throw new Error('El objeto de perfil (profile) es obligatorio para los jugadores.');
+            }
+            if (!value.full_name) {
+                throw new Error('El nombre completo (full_name) es obligatorio para los jugadores.');
+            }
+            if (!value.contact_data) {
+                throw new Error('Los datos de contacto (contact_data) son obligatorios para los jugadores.');
+            }
+            if (!value.representative_data) {
+                throw new Error('Los datos del representante (representative_data) son obligatorios para los jugadores.');
             }
         }
         return true;
     }),
     // Validaciones para los campos dentro del perfil del jugador
     check('profile.birthDate', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
-    check('profile.contact', 'La información de contacto debe ser un objeto').optional().isObject(),
-    check('profile.representativeData', 'Los datos del representante deben ser un objeto').optional().isObject(),
+    check('profile.contact_data', 'La información de contacto debe ser un objeto').if((value, { req }) => req.body.role === Role.PLAYER).isObject(),
+    check('profile.representative_data', 'Los datos del representante deben ser un objeto').if((value, { req }) => req.body.role === Role.PLAYER).isObject(),
     validateFields
 ];
 

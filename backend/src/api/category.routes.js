@@ -45,12 +45,13 @@ router.post(
     assignPlayerController
 );
 
-// Asignar el coach logueado para gestionar una categoría (Solo COACH)
+// Asignar un coach a una categoría (ADMIN puede asignar a cualquiera, COACH solo a sí mismo)
 router.post(
-    '/:id/manage',
+    '/:id/coaches',
     [
-        hasRole(Role.COACH),
+        hasRole(Role.ADMIN, Role.COACH), // Solo ADMIN y COACH pueden acceder
         check('id', 'El ID de la categoría debe ser un número').isInt(),
+        check('coachId', 'El ID del coach es obligatorio y debe ser un número').not().isEmpty().isInt(),
         validateFields,
     ],
     assignCoachController

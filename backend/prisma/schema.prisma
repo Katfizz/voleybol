@@ -15,7 +15,7 @@ model User {
   password_hash String
   role          Role
   created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  updated_at    DateTime @updatedAt @default(now())
 
   profile        PlayerProfile? // Relation to player profile
   announcements  Announcement[] // Relation to announcements authored by this user
