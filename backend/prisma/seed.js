@@ -1,44 +1,44 @@
 const { PrismaClient, Role } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
-const config = require('../src/config/config'); // Importar la configuración central
+const config = require('../src/config/config'); // Usar la configuración centralizada
 
 const prisma = new PrismaClient();
-
 async function main() {
-  const { adminEmail, adminPassword } = config;
+    console.log('Iniciando el proceso de seed...');
 
-  if (!adminEmail || !adminPassword) {
-    console.error(
-      'Error: Las variables de entorno ADMIN_EMAIL y ADMIN_PASSWORD son obligatorias.'
-    );
-    process.exit(1);
-  }
+    const adminEmail = config.adminEmail;
+    const adminPassword = config.adminPassword;
 
-  console.log('Iniciando el proceso de seed...');
+    const salt = bcrypt.genSaltSync();
+    const hashedPassword = bcrypt.hashSync(adminPassword, salt);
 
-  // Hashear la contraseña
-  const salt = bcrypt.genSaltSync();
-  const hashedPassword = bcrypt.hashSync(adminPassword, salt);
-
-  // Usar 'upsert' para crear el admin solo si no existe
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {}, // No hacer nada si ya existe
-    create: {
-      email: adminEmail,
-      password_hash: hashedPassword,
-      role: Role.ADMIN,
-    },
-  });
-
-  console.log(`Usuario administrador '${admin.email}' asegurado en la base de datos.`);
+    // ÚLTIMO RECURSO: Usar SQL crudo para evitar el bug del motor de Prisma.
+    try {
+        // Usamos $executeRawUnsafe porque $executeRaw no soporta ENUMs directamente como parámetros.
+        // Es seguro en este contexto porque los valores no vienen del usuario.
+        await prisma.$executeRawUnsafe(
+            `INSERT INTO "public"."users" ("email", "password_hash", "role") VALUES ($1, $2, CAST($3 AS "public"."Role"))`,
+            adminEmail,
+            hashedPassword,
+            Role.ADMIN
+        );
+        console.log(`Usuario administrador '${adminEmail}' creado exitosamente con SQL crudo.`);
+    } catch (error) {
+        // El código de error para violación de unicidad en PostgreSQL es '23505'
+        if (error.code === 'P2002' || (error.nativeError && error.nativeError.code === '23505')) {
+            console.log(`Usuario administrador '${adminEmail}' ya existe. No se realizaron cambios.`);
+        } else {
+            throw error; // Si es otro error, lo lanzamos para no ocultar problemas reales.
+        }
+    }
+    console.log('Proceso de seed finalizado.');
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+    .catch((e) => {
+        console.error(e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect(); // Asegurarse de desconectar la instancia local
+    });

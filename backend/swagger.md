@@ -1,167 +1,210 @@
-# Documentación de la API (Estilo Swagger)
+# Documentación de la API - Voleyball App
 
-Esta documentación describe los endpoints de la API del proyecto de voleibol.
+Esta es la documentación oficial para la API del backend de la aplicación de gestión del club de voleibol.
 
-**URL Base:** `http://localhost:3000/api`
+**URL Base**: `/api`
 
 ## Autenticación
 
-La mayoría de las rutas de esta API están protegidas. Para acceder a ellas, primero debes obtener un token de autenticación JWT a través de la ruta de login. Luego, debes incluir este token en la cabecera `Authorization` de tus peticiones de la siguiente manera:
-
-`Authorization: Bearer <tu_token_jwt>`
+Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación JWT. El token debe ser enviado en la cabecera `Authorization` con el formato `Bearer <token>`.
 
 ---
 
-## Recurso: Autenticación (`/auth`)
+## Endpoints de Autenticación (`/api/auth`)
 
-### `POST /auth/login`
+### 1. Iniciar Sesión
 
-Autentica un usuario y devuelve un token JWT para ser usado en las demás peticiones.
-
-*   **Permisos:** Público
-*   **Request Body:**
-
+*   **Endpoint**: `POST /login`
+*   **Descripción**: Autentica a un usuario y devuelve un token JWT.
+*   **Acceso**: Público.
+*   **Body (Request)**:
     ```json
     {
-        "email": "admin@example.com",
-        "password": "your_secure_password"
+      "email": "user@example.com",
+      "password": "password123"
     }
     ```
-
-*   **Respuesta Exitosa (200 OK):**
-
+*   **Respuesta (Success 200)**:
     ```json
     {
-        "ok": true,
-        "msg": "Inicio de sesión exitoso",
-        "user": { "id": 1, "email": "admin@example.com", "role": "ADMIN" },
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      "ok": true,
+      "msg": "Inicio de sesión exitoso",
+      "user": {
+        "id": 1,
+        "email": "user@example.com",
+        "role": "ADMIN"
+      },
+      "token": "ey..."
     }
     ```
 
 ---
 
-## Recurso: Usuarios (`/users`)
+## Endpoints de Perfil (`/api/profile`)
 
-### `POST /users`
+### 1. Obtener Perfil Propio
 
-Crea un nuevo usuario en el sistema. El `body` varía según el rol (`role`).
-
-*   **Permisos:**
-    *   `ADMIN` puede crear `ADMIN`, `COACH`, y `PLAYER`.
-    *   `COACH` puede crear `PLAYER`.
-
-*   **Request Body (para `ADMIN` o `COACH`):**
-
+*   **Endpoint**: `GET /`
+*   **Descripción**: Devuelve la información del perfil del usuario autenticado.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
     ```json
     {
-        "email": "new.coach@example.com",
-        "password": "passwordForCoach123",
-        "role": "COACH"
-    }
-    ```
-
-*   **Request Body (para `PLAYER`):**
-
-    ```json
-    {
-        "email": "new.player@example.com",
-        "password": "passwordForPlayer123",
+      "ok": true,
+      "profile": {
+        "id": 1,
+        "email": "user@example.com",
         "role": "PLAYER",
         "profile": {
-            "firstName": "Carlos",
-            "lastName": "Vargas",
-            "birthDate": "2006-04-15T00:00:00.000Z",
-            "contact": {
-                "phone": "555-123-4567",
-                "address": "Avenida Central 101"
-            },
-            "representativeData": {
-                "fullName": "Maria Vargas",
-                "phone": "555-765-4321",
-                "email": "maria.vargas@example.com"
-            }
+          "id": 1,
+          "full_name": "Juan Pérez",
+          ...
         }
+      }
     }
     ```
-
-*   **Respuesta Exitosa (201 Created):**
-
-    ```json
-    {
-        "ok": true,
-        "msg": "Usuario creado exitosamente.",
-        "user": { "id": 12, "email": "new.player@example.com", "role": "PLAYER" }
-    }
-    ```
-
-### `GET /users`
-
-Devuelve una lista de todos los usuarios del sistema.
-
-*   **Permisos:** `ADMIN`
-*   **Request Body:** Ninguno.
-
-### `GET /users/:id`
-
-Devuelve la información de un usuario específico.
-
-*   **Permisos:** `ADMIN` o el propio usuario.
-*   **Request Body:** Ninguno.
-
-### `PUT /users/:id`
-
-Actualiza la información de un usuario. Todos los campos en el `body` son opcionales.
-
-*   **Permisos:** `ADMIN` o el propio usuario. Solo un `ADMIN` puede cambiar el rol.
-*   **Request Body:**
-
-    ```json
-    {
-        "full_name": "Carlos Alberto Vargas",
-        "position": "Libero",
-        "password": "newSecurePassword123"
-    }
-    ```
-
-*   **Respuesta Exitosa (200 OK):**
-
-    ```json
-    {
-        "ok": true,
-        "msg": "Usuario actualizado exitosamente",
-        "user": {
-            "id": 12,
-            "email": "new.player@example.com",
-            "role": "PLAYER",
-            "playerProfile": { "full_name": "Carlos Alberto Vargas", "position": "Libero" }
-        }
-    }
-    ```
-
-### `DELETE /users/:id`
-
-Elimina un usuario del sistema.
-
-*   **Permisos:** `ADMIN`
-*   **Request Body:** Ninguno.
 
 ---
 
-## Recurso: Perfil (`/profile`)
+## Endpoints de Categorías (`/api/categories`)
 
-### `GET /profile`
+### 1. Obtener Todas las Categorías
 
-Devuelve el perfil del jugador asociado al token de autenticación.
+*   **Endpoint**: `GET /`
+*   **Acceso**: Cualquier usuario autenticado.
 
-*   **Permisos:** Cualquier usuario autenticado (aunque solo devolverá datos si es un `PLAYER`).
-*   **Request Body:** Ninguno.
-*   **Respuesta Exitosa (200 OK):**
+### 2. Obtener Categoría por ID
 
+*   **Endpoint**: `GET /:id`
+*   **Acceso**: Cualquier usuario autenticado.
+
+### 3. Crear una Categoría
+
+*   **Endpoint**: `POST /`
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
     ```json
     {
-        "full_name": "Carlos Vargas",
-        "birth_date": "2006-04-15T00:00:00.000Z",
-        "position": null
+      "name": "Sub-18 Femenino",
+      "description": "Categoría para jugadoras menores de 18 años."
     }
     ```
+
+### 4. Actualizar una Categoría
+
+*   **Endpoint**: `PUT /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "name": "Nuevo Nombre",
+      "description": "Nueva descripción."
+    }
+    ```
+
+### 5. Eliminar una Categoría
+
+*   **Endpoint**: `DELETE /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+
+### 6. Asignar un Jugador a una Categoría
+
+*   **Endpoint**: `POST /:id/players`
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "playerId": 25
+    }
+    ```
+
+### 7. Asignar un Coach a una Categoría
+
+*   **Endpoint**: `POST /:id/coaches`
+*   **Descripción**: Asigna un coach a una categoría. La lógica de permisos es la siguiente:
+    *   Un `ADMIN` puede asignar cualquier usuario con rol `COACH`.
+    *   Un `COACH` solo puede asignarse a sí mismo (debe enviar su propio ID en el body).
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "coachId": 12
+    }
+    ```
+
+---
+
+## Endpoints de Usuarios (`/api/users`)
+
+### 1. Obtener Todos los Usuarios
+
+*   **Endpoint**: `GET /`
+*   **Acceso**: `ADMIN`.
+
+### 2. Crear un Nuevo Usuario
+
+*   **Endpoint**: `POST /`
+*   **Descripción**: Crea un nuevo usuario en el sistema. Esta acción requiere que un usuario ya esté autenticado.
+*   **Acceso**:
+    *   `ADMIN`: Puede crear `ADMIN`, `COACH`, y `PLAYER`.
+    *   `COACH`: Puede crear `PLAYER`.
+*   **Body (Request para PLAYER)**:
+    ```json
+    {
+      "email": "player@example.com",
+      "password": "password123",
+      "role": "PLAYER",
+      "profile": {
+        "full_name": "Juan Pérez",
+        "birthDate": "2005-08-15T00:00:00.000Z",
+        "contact_data": {
+          "phone": "123-456-7890",
+          "address": "Calle Falsa 123"
+        },
+        "representative_data": {
+          "name": "Maria Pérez",
+          "phone": "987-654-3210"
+        }
+      }
+    }
+    ```
+*   **Body (Request para COACH/ADMIN)**:
+    ```json
+    {
+      "email": "coach@example.com",
+      "password": "password123",
+      "role": "COACH"
+    }
+    ```
+*   **Respuesta (Success 201)**:
+    ```json
+    {
+      "ok": true,
+      "msg": "Usuario creado exitosamente.",
+      "user": { ... }
+    }
+    ```
+
+### 2. Obtener Usuario por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Acceso**: `ADMIN` o el propio usuario.
+
+### 3. Actualizar un Usuario
+
+*   **Endpoint**: `PUT /:id`
+*   **Acceso**: `ADMIN` o el propio usuario. Solo un `ADMIN` puede cambiar el rol.
+*   **Body (Request)**:
+    ```json
+    {
+      "email": "nuevo@email.com",
+      "profile": {
+        "full_name": "Nuevo Nombre Completo"
+      }
+    }
+    ```
+
+### 4. Eliminar un Usuario
+
+*   **Endpoint**: `DELETE /:id`
+*   **Acceso**: `ADMIN`.

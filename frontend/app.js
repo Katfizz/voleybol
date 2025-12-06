@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // URLs de la API
-    const API_URL = 'http://localhost:3001/api';
+    const API_URL = 'http://localhost:3001/api'; // El backend corre en el puerto 3001 por defecto
 
     // Vistas
     const authView = document.getElementById('auth-view');
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Decodificar token para mostrar info (forma simple, sin validar firma)
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                userInfoContainer.innerHTML = `<pre>ID de Usuario: ${payload.uid}\nEmail: ${payload.name}</pre>`;
+                userInfoContainer.innerHTML = `<pre>ID de Usuario: ${payload.uid}\nEmail: ${payload.email}</pre>`;
             } catch (e) {
                 userInfoContainer.textContent = 'No se pudo decodificar el token.';
             }
