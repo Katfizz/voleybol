@@ -1,28 +1,6 @@
 const { response } = require('express');
 const userService = require('../services/users.service');
-const { AppError } = require('../utils/errors');
-
-/**
- * Manejador de errores centralizado para el controlador.
- * @param {response} res - El objeto de respuesta de Express.
- * @param {Error} error - El error capturado.
- */
-const handleHttpError = (res, error) => {
-    console.error("Error en la capa de usuarios:", error.message);
-
-    if (error instanceof AppError) {
-        return res.status(error.statusCode).json({
-            ok: false,
-            msg: error.message
-        });
-    }
-    
-    // Para cualquier otro tipo de error, devolver un 500 genérico.
-    return res.status(500).json({
-        ok: false,
-        msg: 'Ocurrió un error inesperado en el servidor.'
-    });
-};
+const { handleHttpError } = require('../utils/errors');
 
 const createUser = async (req, res = response) => {
     try {

@@ -1,5 +1,5 @@
 const categoryService = require('../services/category.service');
-const { AppError } = require('../utils/errors');
+const { handleHttpError } = require('../utils/errors');
 
 const createCategoryController = async (req, res) => {
     try {
@@ -10,8 +10,7 @@ const createCategoryController = async (req, res) => {
             category,
         });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -26,8 +25,7 @@ const assignPlayerController = async (req, res) => {
             category: updatedCategory,
         });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -36,8 +34,7 @@ const getAllCategoriesController = async (req, res) => {
         const categories = await categoryService.getAllCategories();
         res.json({ ok: true, categories });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -46,8 +43,7 @@ const getCategoryByIdController = async (req, res) => {
         const category = await categoryService.getCategoryById(req.params.id);
         res.json({ ok: true, category });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -56,8 +52,7 @@ const updateCategoryController = async (req, res) => {
         const category = await categoryService.updateCategory(req.params.id, req.body);
         res.json({ ok: true, msg: 'Categoría actualizada exitosamente.', category });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -66,8 +61,7 @@ const deleteCategoryController = async (req, res) => {
         await categoryService.deleteCategory(req.params.id);
         res.json({ ok: true, msg: 'Categoría eliminada exitosamente.' });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -82,8 +76,7 @@ const assignCoachController = async (req, res) => {
             category: updatedCategory,
         });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -96,8 +89,7 @@ const removePlayerFromCategoryController = async (req, res) => {
             msg: `Jugador con ID ${playerId} desasignado de la categoría con ID ${id} exitosamente.`,
         });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
@@ -110,8 +102,7 @@ const removeCoachFromCategoryController = async (req, res) => {
             msg: `Coach con ID ${coachId} desasignado de la categoría con ID ${id} exitosamente.`,
         });
     } catch (error) {
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
