@@ -17,8 +17,23 @@ const userCreationValidation = [
             if (!value.contact_data) {
                 throw new Error('Los datos de contacto (contact_data) son obligatorios para los jugadores.');
             }
-            if (!value.representative_data) {
-                throw new Error('Los datos del representante (representative_data) son obligatorios para los jugadores.');
+
+            // La fecha de nacimiento es necesaria para validar la edad.
+            if (!value.birthDate) {
+                throw new Error('La fecha de nacimiento (birthDate) es obligatoria para los jugadores.');
+            }
+
+            // Lógica para validar la edad y requerir datos del representante si es menor de 18.
+            const birthDateObj = new Date(value.birthDate);
+            const today = new Date();
+            let age = today.getFullYear() - birthDateObj.getFullYear();
+            const monthDifference = today.getMonth() - birthDateObj.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDateObj.getDate())) {
+                age--;
+            }
+
+            if (age < 18 && !value.representative_data) {
+                throw new Error('Los datos del representante (representative_data) son obligatorios para jugadores menores de 18 años.');
             }
         }
         return true;

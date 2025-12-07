@@ -87,6 +87,34 @@ const assignCoachController = async (req, res) => {
     }
 };
 
+const removePlayerFromCategoryController = async (req, res) => {
+    try {
+        const { id, playerId } = req.params;
+        await categoryService.removePlayerFromCategory(id, playerId, req.user);
+        res.json({
+            ok: true,
+            msg: `Jugador con ID ${playerId} desasignado de la categoría con ID ${id} exitosamente.`,
+        });
+    } catch (error) {
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+    }
+};
+
+const removeCoachFromCategoryController = async (req, res) => {
+    try {
+        const { id, coachId } = req.params;
+        await categoryService.removeCoachFromCategory(id, coachId, req.user);
+        res.json({
+            ok: true,
+            msg: `Coach con ID ${coachId} desasignado de la categoría con ID ${id} exitosamente.`,
+        });
+    } catch (error) {
+        const statusCode = error instanceof AppError ? error.statusCode : 500;
+        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+    }
+};
+
 module.exports = {
     createCategoryController,
     assignPlayerController,
@@ -95,4 +123,6 @@ module.exports = {
     updateCategoryController,
     deleteCategoryController,
     assignCoachController,
+    removePlayerFromCategoryController,
+    removeCoachFromCategoryController,
 };
