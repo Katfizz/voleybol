@@ -83,10 +83,11 @@ const assignCoachController = async (req, res) => {
 const removePlayerFromCategoryController = async (req, res) => {
     try {
         const { id, playerId } = req.params;
-        await categoryService.removePlayerFromCategory(id, playerId, req.user);
+        const updatedCategory = await categoryService.removePlayerFromCategory(id, playerId, req.user);
         res.json({
             ok: true,
             msg: `Jugador con ID ${playerId} desasignado de la categoría con ID ${id} exitosamente.`,
+            category: updatedCategory,
         });
     } catch (error) {
         handleHttpError(res, error);
@@ -96,10 +97,11 @@ const removePlayerFromCategoryController = async (req, res) => {
 const removeCoachFromCategoryController = async (req, res) => {
     try {
         const { id, coachId } = req.params;
-        await categoryService.removeCoachFromCategory(id, coachId, req.user);
+        const updatedCategory = await categoryService.removeCoachFromCategory(id, coachId, req.user);
         res.json({
             ok: true,
             msg: `Coach con ID ${coachId} desasignado de la categoría con ID ${id} exitosamente.`,
+            category: updatedCategory,
         });
     } catch (error) {
         handleHttpError(res, error);

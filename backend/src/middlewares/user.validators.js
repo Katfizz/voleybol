@@ -23,25 +23,13 @@ const userCreationValidation = [
                 throw new Error('La fecha de nacimiento (birthDate) es obligatoria para los jugadores.');
             }
 
-            // Lógica para validar la edad y requerir datos del representante si es menor de 18.
-            const birthDateObj = new Date(value.birthDate);
-            const today = new Date();
-            let age = today.getFullYear() - birthDateObj.getFullYear();
-            const monthDifference = today.getMonth() - birthDateObj.getMonth();
-            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDateObj.getDate())) {
-                age--;
-            }
-
-            if (age < 18 && !value.representative_data) {
-                throw new Error('Los datos del representante (representative_data) son obligatorios para jugadores menores de 18 años.');
-            }
         }
         return true;
     }),
     // Validaciones para los campos dentro del perfil del jugador
     check('profile.birthDate', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
     check('profile.contact_data', 'La información de contacto debe ser un objeto').if((value, { req }) => req.body.role === Role.PLAYER).isObject(),
-    check('profile.representative_data', 'Los datos del representante deben ser un objeto').if((value, { req }) => req.body.role === Role.PLAYER).isObject(),
+    check('profile.representative_data', 'Los datos del representante deben ser un objeto').optional().isObject(),
     validateFields
 ];
 
