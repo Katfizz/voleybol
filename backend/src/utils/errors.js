@@ -50,10 +50,42 @@ class ForbiddenError extends AppError {
     }
 }
 
+/**
+ * Error para recursos no encontrados.
+ * HTTP Status Code: 404
+ */
+class NotFoundError extends AppError {
+    constructor(message = 'Recurso no encontrado.') {
+        super(message, 404);
+    }
+}
+
+/**
+ * Manejador de errores HTTP centralizado para los controladores.
+ * Envía una respuesta JSON con el código de estado y mensaje adecuados.
+ * @param {object} res - El objeto de respuesta de Express.
+ * @param {Error} error - El error capturado.
+ */
+const handleHttpError = (res, error) => {
+    console.error("API Error:", error.message); // Log del error para debugging
+
+    if (error instanceof AppError) {
+        return res.status(error.statusCode).json({
+            ok: false,
+            msg: error.message
+        });
+    }
+    
+    // Para cualquier otro tipo de error, devolver un 500 genérico.
+    return res.status(500).json({ ok: false, msg: 'Error interno del servidor.' });
+};
+
 module.exports = {
     AppError,
     ConflictError,
     UnauthorizedError,
     BadRequestError,
-    ForbiddenError
+    ForbiddenError,
+    NotFoundError,
+    handleHttpError,
 };

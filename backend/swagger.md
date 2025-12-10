@@ -107,6 +107,12 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
 *   **Endpoint**: `DELETE /:id`
 *   **Acceso**: `ADMIN`, `COACH`.
 
+### 6. Desasignar un Jugador de una Categoría
+
+*   **Endpoint**: `DELETE /:id/players/:playerId`
+*   **Descripción**: Elimina la asignación de un jugador a una categoría.
+*   **Acceso**: `ADMIN`, `COACH`.
+
 ### 6. Asignar un Jugador a una Categoría
 
 *   **Endpoint**: `POST /:id/players`
@@ -130,6 +136,13 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
     {
       "coachId": 12
     }
+    ```
+
+### 8. Desasignar un Coach de una Categoría
+
+*   **Endpoint**: `DELETE /:id/coaches/:coachId`
+*   **Descripción**: Elimina la asignación de un coach a una categoría. Un `COACH` solo puede desasignarse a sí mismo.
+*   **Acceso**: `ADMIN`, `COACH`.
     ```
 
 ---

@@ -1,5 +1,5 @@
 const prisma = require('../db/prisma');
-const { ForbiddenError, ConflictError, NotFoundError, AppError } = require('../utils/errors');
+const { ForbiddenError, ConflictError, NotFoundError, AppError, BadRequestError } = require('../utils/errors');
 const { Role } = require('@prisma/client');
 
 /**
@@ -40,6 +40,18 @@ const assignPlayerToCategory = async (categoryId, playerId, requestingUser) => {
         throw new ForbiddenError('No tienes permiso para asignar jugadores.');
     }
 
+    // Verificación explícita de que la categoría existe.
+    const categoryExists = await prisma.category.findUnique({ where: { id: catId } });
+    if (!categoryExists) {
+        throw new NotFoundError(`La categoría con ID ${catId} no existe.`);
+    }
+
+    // Verificación explícita de que el jugador y su perfil existen.
+    const playerProfileExists = await prisma.playerProfile.findUnique({ where: { user_id: pId } });
+    if (!playerProfileExists) {
+        throw new NotFoundError(`El jugador con ID ${pId} no existe o no tiene un perfil de jugador.`);
+    }
+
     // Usar una actualización anidada para que Prisma maneje la conexión de forma atómica.
     // Si no encuentra un playerProfile con el user_id: pId, la operación fallará.
     try {
@@ -59,9 +71,8 @@ const assignPlayerToCategory = async (categoryId, playerId, requestingUser) => {
             },
         });
     } catch (error) {
-        // Capturamos el error de Prisma si no encuentra el perfil y devolvemos un mensaje más claro.
-        // Esto es más robusto que hacer dos consultas separadas.
-        throw new NotFoundError(`No se pudo asignar el jugador. Asegúrate de que la categoría con ID ${catId} y el jugador con ID ${pId} (con perfil) existan.`);
+        // Este catch ahora es una salvaguarda para errores inesperados durante la actualización.
+        throw new AppError('Ocurrió un error inesperado al asignar el jugador.', 500);
     }
 };
 
@@ -159,7 +170,116 @@ const updateCategory = async (categoryId, dataToUpdate) => {
  */
 const deleteCategory = async (categoryId) => {
     const id = parseInt(categoryId, 10);
-    return prisma.category.delete({ where: { id } });
+
+    // Primero, verificamos si la categoría existe.
+    const category = await prisma.category.findUnique({
+        where: { id },
+    });
+
+    if (!category) {
+        throw new NotFoundError(`No se encontró una categoría con el ID ${id} para eliminar.`);
+    }
+
+    return prisma.category.delete({ where: { id } }); // Si existe, la eliminamos.
+};
+
+/**
+ * Desasigna un jugador de una categoría.
+ * @param {string} categoryId - El ID de la categoría.
+ * @param {string} playerId - El ID del usuario (jugador) a desasignar.
+ * @param {object} requestingUser - Usuario que realiza la solicitud.
+ * @returns {Promise<object>} La categoría actualizada.
+ */
+const removePlayerFromCategory = async (categoryId, playerId, requestingUser) => {
+    const catId = parseInt(categoryId, 10);
+    const pId = parseInt(playerId, 10);
+
+    if (requestingUser.role !== Role.ADMIN && requestingUser.role !== Role.COACH) {
+        throw new ForbiddenError('No tienes permiso para desasignar jugadores.');
+    }
+
+    // Verificar si la categoría existe y si el jugador está realmente asignado a ella.
+    const category = await prisma.category.findUnique({
+        where: { id: catId },
+        include: { playerProfiles: { where: { user_id: pId } } },
+    });
+
+    if (!category) {
+        throw new NotFoundError(`La categoría con ID ${catId} no existe.`);
+    }
+
+    if (category.playerProfiles.length === 0) {
+        throw new BadRequestError(`El jugador con ID ${pId} no se encuentra asignado a esta categoría.`);
+    }
+
+    try {
+        return await prisma.category.update({
+            where: { id: catId },
+            data: {
+                playerProfiles: {
+                    disconnect: { user_id: pId },
+                },
+            },
+            include: { // Devolver la categoría con sus relaciones actualizadas
+                playerProfiles: true,
+                coaches: true,
+            },
+        });
+    } catch (error) {
+        throw new AppError(`Ocurrió un error inesperado al intentar desasignar al jugador con ID ${pId}.`, 500);
+    }
+};
+
+/**
+ * Desasigna un coach de una categoría.
+ * @param {string} categoryId - El ID de la categoría.
+ * @param {string} coachId - El ID del usuario (coach) a desasignar.
+ * @param {object} requestingUser - Usuario que realiza la solicitud.
+ * @returns {Promise<object>} La categoría actualizada.
+ */
+const removeCoachFromCategory = async (categoryId, coachId, requestingUser) => {
+    const catId = parseInt(categoryId, 10);
+    const cId = parseInt(coachId, 10);
+
+    if (requestingUser.role !== Role.ADMIN && requestingUser.role !== Role.COACH) {
+        throw new ForbiddenError('No tienes permiso para desasignar coaches.');
+    }
+
+    // Un COACH solo puede desasignarse a sí mismo.
+    if (requestingUser.role === Role.COACH && requestingUser.id !== cId) {
+        throw new ForbiddenError('No tienes permiso para desasignar a otros coaches.');
+    }
+
+    // Verificar si la categoría existe y si el coach está realmente asignado a ella.
+    const category = await prisma.category.findUnique({
+        where: { id: catId },
+        include: { coaches: { where: { id: cId } } },
+    });
+
+    if (!category) {
+        throw new NotFoundError(`La categoría con ID ${catId} no existe.`);
+    }
+
+    if (category.coaches.length === 0) {
+        throw new BadRequestError(`El coach con ID ${cId} no se encuentra asignado a esta categoría.`);
+    }
+
+    try {
+        return await prisma.category.update({
+            where: { id: catId },
+            data: {
+                coaches: {
+                    disconnect: { id: cId },
+                },
+            },
+            include: { // Devolver la categoría con sus relaciones actualizadas
+                playerProfiles: true,
+                coaches: true,
+            },
+        });
+    } catch (error) {
+        throw new AppError(`Ocurrió un error inesperado al intentar desasignar al coach con ID ${cId}.`, 500);
+    }
 };
 
 module.exports = {
@@ -170,4 +290,6 @@ module.exports = {
     getCategoryById,
     updateCategory,
     deleteCategory,
+    removePlayerFromCategory,
+    removeCoachFromCategory,
 };

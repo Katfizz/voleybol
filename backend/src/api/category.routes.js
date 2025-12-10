@@ -9,6 +9,8 @@ const {
     updateCategoryController,
     deleteCategoryController,
     assignCoachController, // Importar el nuevo controlador
+    removePlayerFromCategoryController,
+    removeCoachFromCategoryController,
 } = require('../controllers/category.controller');
 const { Role } = require('@prisma/client');
 
@@ -72,5 +74,28 @@ router.delete('/:id', [
     validateFields,
 ], deleteCategoryController);
 
+// Desasignar un jugador de una categoría (ADMIN, COACH)
+router.delete(
+    '/:id/players/:playerId',
+    [
+        hasRole(Role.ADMIN, Role.COACH),
+        check('id', 'El ID de la categoría debe ser un número').isInt(),
+        check('playerId', 'El ID del jugador debe ser un número').isInt(),
+        validateFields,
+    ],
+    removePlayerFromCategoryController
+);
+
+// Desasignar un coach de una categoría (ADMIN, COACH)
+router.delete(
+    '/:id/coaches/:coachId',
+    [
+        hasRole(Role.ADMIN, Role.COACH),
+        check('id', 'El ID de la categoría debe ser un número').isInt(),
+        check('coachId', 'El ID del coach debe ser un número').isInt(),
+        validateFields,
+    ],
+    removeCoachFromCategoryController
+);
 
 module.exports = router;

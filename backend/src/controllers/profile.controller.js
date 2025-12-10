@@ -1,5 +1,5 @@
 const { getProfile } = require('../services/profile.service');
-const { AppError } = require('../utils/errors');
+const { handleHttpError } = require('../utils/errors');
 
 /**
  * Controlador para obtener el perfil del usuario autenticado.
@@ -14,9 +14,7 @@ const getProfileController = async (req, res) => {
             profile: userProfile,
         });
     } catch (error) {
-        // Manejo de errores centralizado sería ideal, pero por ahora esto funciona.
-        const statusCode = error instanceof AppError ? error.statusCode : 500;
-        res.status(statusCode).json({ ok: false, msg: error.message || 'Error interno del servidor.' });
+        handleHttpError(res, error);
     }
 };
 
