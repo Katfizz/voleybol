@@ -42,7 +42,7 @@ model PlayerProfile {
   categories Category[] @relation("PlayerProfileToCategory")
 
   attendances Attendance[] // Relation to attendances
-  statistics  Statistic[]  // Relation to statistics
+  stats       Statistic[]  // Relation to statistics
 
   @@map("player_profiles")
 }
@@ -59,15 +59,21 @@ model Announcement {
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
-  type        EventType
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  type        EventType // Enum: MATCH, PRACTICE, TOURNAMENT
   date_time   DateTime
   location    String?
   description String?
-  created_at  DateTime @default(now())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  // Relaciones
+  categories Category[] @relation("EventToCategory")
+  matches    Match[]
+  practice   Practice?
 
   attendances Attendance[] // Relation to attendances
-  statistics  Statistic[]  // Relation to statistics
 
   @@map("events")
 }
@@ -86,16 +92,21 @@ model Attendance {
 
 model Statistic {
   id                Int           @id @default(autoincrement())
-  player_profile    PlayerProfile @relation(fields: [player_profile_id], references: [id])
   player_profile_id Int
-  event             Event?        @relation(fields: [event_id], references: [id])
-  event_id          Int?
-  stat_type         String
-  value             Decimal
-  notes             String?
-  created_at        DateTime      @default(now())
+  player_profile    PlayerProfile @relation(fields: [player_profile_id], references: [id])
+  match_id          Int
+  match             Match         @relation(fields: [match_id], references: [id], onDelete: Cascade)
 
-  @@map("statistics")
+  points  Int @default(0)
+  kills   Int @default(0)
+  errors  Int @default(0)
+  aces    Int @default(0)
+  blocks  Int @default(0)
+  assists Int @default(0)
+  digs    Int @default(0)
+
+  @@unique([player_profile_id, match_id])
+  @@map("player_stats")
 }
 
 model Category {
@@ -106,10 +117,68 @@ model Category {
   // Relaciones muchos a muchos
   playerProfiles PlayerProfile[] @relation("PlayerProfileToCategory")
   coaches        User[]          @relation("CoachToCategory")
+  events         Event[]         @relation("EventToCategory")
+
+  // Relaciones para partidos
+  homeMatches Match[] @relation("HomeMatches")
+  awayMatches Match[] @relation("AwayMatches")
+  wonMatches  Match[] @relation("WonMatches")
+  wonSets     Set[]   @relation("WonSets")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   @@map("categories")
+}
+
+// --- Modelos Adicionales para Eventos ---
+
+model Practice {
+  event_id  Int   @id
+  event     Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  objective String?
+  notes     String?
+  drills    Json?
+
+  @@map("practices")
+}
+
+model Match {
+  id Int @id @default(autoincrement())
+
+  event_id Int
+  event    Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  home_category_id Int
+  homeCategory     Category @relation("HomeMatches", fields: [home_category_id], references: [id])
+  away_category_id Int
+  awayCategory     Category @relation("AwayMatches", fields: [away_category_id], references: [id])
+
+  home_sets_won Int @default(0)
+  away_sets_won Int @default(0)
+
+  winner_category_id Int?
+  winnerCategory     Category? @relation("WonMatches", fields: [winner_category_id], references: [id])
+
+  sets         Set[]
+  player_stats Statistic[]
+
+  @@map("matches")
+}
+
+model Set {
+  id         Int   @id @default(autoincrement())
+  match_id   Int
+  match      Match @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  set_number Int
+
+  home_score Int
+  away_score Int
+
+  winner_category_id Int?
+  winnerCategory     Category? @relation("WonSets", fields: [winner_category_id], references: [id])
+
+  @@unique([match_id, set_number])
+  @@map("sets")
 }
 
 // --- Enums ---
@@ -123,6 +192,7 @@ enum Role {
 enum EventType {
   MATCH
   PRACTICE
+  TOURNAMENT
 }
 
 enum AttendanceStatus {
