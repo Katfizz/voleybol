@@ -216,12 +216,38 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
 *   **Endpoint**: `GET /`
 *   **Descripción**: Devuelve una lista de todos los eventos, ordenados por fecha.
 *   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "events": [
+            {
+                "id": 5,
+                "name": "Jornada de Sábado - Liga Juvenil",
+                "type": "MATCH",
+                "date_time": "2024-09-21T09:00:00.000Z",
+                "location": "Cancha Central",
+                "categories": [ { "id": 1, "name": "Equipo A" }, ... ],
+                "_count": {
+                    "matches": 2
+                }
+            }
+        ]
+    }
+    ```
 
 ### 2. Obtener Evento por ID
 
 *   **Endpoint**: `GET /:id`
 *   **Descripción**: Devuelve los detalles de un evento específico, incluyendo sus partidos y detalles de práctica si aplica.
 *   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "event": { ... "matches": [ { "id": 10, ... }, { "id": 11, ... } ] }
+    }
+    ```
 
 ### 3. Crear un Evento
 
@@ -242,6 +268,15 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
         "objective": "Mejorar la efectividad del primer saque."
       }
     }
+    // Ejemplo para crear una JORNADA DE PARTIDOS
+    {
+      "name": "Jornada de Fin de Semana - Liga Juvenil",
+      "type": "MATCH",
+      "date_time": "2024-08-17T09:00:00Z",
+      "location": "Cancha Central",
+      "description": "Partidos correspondientes a la fecha 5.",
+      "categoryIds": [1, 2, 3, 4]
+    }
     ```
 
 ### 4. Actualizar un Evento
@@ -254,7 +289,8 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
     {
       "name": "Nuevo Nombre del Evento",
       "location": "Cancha Alterna",
-      "description": "Descripción actualizada."
+      "description": "Descripción actualizada.",
+      "categoryIds": [3, 4]
     }
     ```
 
