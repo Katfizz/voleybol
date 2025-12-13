@@ -1,315 +1,277 @@
-openapi: 3.0.0
-info:
-  title: Voleyball Project API
-  description: API para la gestión de equipos, jugadores y eventos de voleibol.
-  version: 1.0.0
+# Documentación de la API - Voleyball App
 
-servers:
-  - url: http://localhost:8080/api
-    description: Servidor de desarrollo
+Esta es la documentación oficial para la API del backend de la aplicación de gestión del club de voleibol.
 
-tags:
-  - name: Auth
-    description: Autenticación y obtención de tokens
-  - name: Users
-    description: Gestión de usuarios (jugadores, coaches, admins)
-  - name: Categories
-    description: Gestión de categorías (equipos)
-  - name: Events & Matches
-    description: Gestión de eventos (prácticas, jornadas) y partidos
+**URL Base**: `/api`
 
-paths:
-  /auth/login:
-    post:
-      tags:
-        - Auth
-      summary: Iniciar sesión para obtener un token JWT
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  example: admin@test.com
-                password:
-                  type: string
-                  example: '123456'
-      responses:
-        '200':
-          description: Login exitoso, devuelve el token.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LoginSuccess'
-        '401':
-          description: Credenciales no válidas.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+## Autenticación
 
-  # --- Events ---
-  /events:
-    post:
-      tags:
-        - Events & Matches
-      summary: Crear un nuevo evento (práctica o jornada de partidos)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            examples:
-              create_practice:
-                summary: Ejemplo para crear una Práctica
-                value:
-                  name: "Entrenamiento de Saque y Recepción"
-                  type: "PRACTICE"
-                  date_time: "2024-08-15T18:00:00Z"
-                  location: "Gimnasio Principal"
-                  description: "Práctica enfocada en fundamentos."
-                  categoryIds: [1, 2]
-                  practice:
-                    objective: "Mejorar la efectividad del primer saque."
-              create_match_day:
-                summary: Ejemplo para crear una Jornada de Partidos
-                value:
-                  name: "Jornada de Fin de Semana - Liga Juvenil"
-                  type: "MATCH"
-                  date_time: "2024-08-17T09:00:00Z"
-                  location: "Cancha Central"
-                  description: "Partidos correspondientes a la fecha 5."
-                  categoryIds: [1, 2, 3, 4]
-      responses:
-        '201':
-          description: Evento creado exitosamente.
-        '400':
-          description: Datos inválidos.
-        '401':
-          description: No autenticado.
-        '403':
-          description: No autorizado (rol incorrecto).
-        '409':
-          description: Ya existe un evento con ese nombre.
+Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación JWT. El token debe ser enviado en la cabecera `Authorization` con el formato `Bearer <token>`.
 
-    get:
-      tags:
-        - Events & Matches
-      summary: Obtener todos los eventos
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Lista de eventos.
+---
 
-  /events/{id}:
-    get:
-      tags:
-        - Events & Matches
-      summary: Obtener un evento por su ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Detalles del evento.
-        '404':
-          description: Evento no encontrado.
+## Endpoints de Autenticación (`/api/auth`)
 
-    put:
-      tags:
-        - Events & Matches
-      summary: Actualizar un evento
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                date_time:
-                  type: string
-                  format: date-time
-                location:
-                  type: string
-      responses:
-        '200':
-          description: Evento actualizado.
-        '404':
-          description: Evento no encontrado.
+### 1. Iniciar Sesión
 
-    delete:
-      tags:
-        - Events & Matches
-      summary: Eliminar un evento
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Evento eliminado.
-        '404':
-          description: Evento no encontrado.
+*   **Endpoint**: `POST /login`
+*   **Descripción**: Autentica a un usuario y devuelve un token JWT.
+*   **Acceso**: Público.
+*   **Body (Request)**:
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "password123"
+    }
+    ```
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+      "ok": true,
+      "msg": "Inicio de sesión exitoso",
+      "user": {
+        "id": 1,
+        "email": "user@example.com",
+        "role": "ADMIN"
+      },
+      "token": "ey..."
+    }
+    ```
 
-  # --- Matches ---
-  /events/{id}/matches:
-    post:
-      tags:
-        - Events & Matches
-      summary: Añadir un partido a un evento existente
-      description: Crea un nuevo partido y lo asocia a un evento de tipo 'MATCH' o 'TOURNAMENT'.
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: El ID del evento contenedor.
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                home_category_id:
-                  type: integer
-                  description: ID de la categoría (equipo) local.
-                  example: 1
-                away_category_id:
-                  type: integer
-                  description: ID de la categoría (equipo) visitante.
-                  example: 2
-      responses:
-        '201':
-          description: Partido creado y añadido al evento exitosamente.
-        '400':
-          description: Datos inválidos (ej. el evento no es de tipo 'MATCH', o los equipos son el mismo).
-        '404':
-          description: El evento o una de las categorías no existen.
+---
 
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+## Endpoints de Perfil (`/api/profile`)
 
-  schemas:
-    LoginSuccess:
-      type: object
-      properties:
-        ok:
-          type: boolean
-          example: true
-        user:
-          type: object
-          properties:
-            id:
-              type: integer
-            email:
-              type: string
-            role:
-              type: string
-        token:
-          type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+### 1. Obtener Perfil Propio
 
-    Error:
-      type: object
-      properties:
-        ok:
-          type: boolean
-          example: false
-        msg:
-          type: string
-          example: "Error interno del servidor."
+*   **Endpoint**: `GET /`
+*   **Descripción**: Devuelve la información del perfil del usuario autenticado.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+      "ok": true,
+      "profile": {
+        "id": 1,
+        "email": "user@example.com",
+        "role": "PLAYER",
+        "profile": {
+          "id": 1,
+          "full_name": "Juan Pérez",
+          ...
+        }
+      }
+    }
+    ```
 
-    Event:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        type:
-          type: string
-          enum: [MATCH, PRACTICE, TOURNAMENT]
-        date_time:
-          type: string
-          format: date-time
-        location:
-          type: string
-        description:
-          type: string
-        categories:
-          type: array
-          items:
-            $ref: '#/components/schemas/Category'
-        practice:
-          $ref: '#/components/schemas/Practice'
-        matches:
-          type: array
-          items:
-            $ref: '#/components/schemas/Match'
+---
 
-    Practice:
-      type: object
-      properties:
-        objective:
-          type: string
-        notes:
-          type: string
-        drills:
-          type: object
+## Endpoints de Categorías (`/api/categories`)
 
-    Match:
-      type: object
-      properties:
-        id:
-          type: integer
-        event_id:
-          type: integer
-        home_category_id:
-          type: integer
-        away_category_id:
-          type: integer
-        home_sets_won:
-          type: integer
-        away_sets_won:
-          type: integer
+### 1. Obtener Todas las Categorías
 
-    Category:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        description:
-          type: string
+*   **Endpoint**: `GET /`
+*   **Acceso**: Cualquier usuario autenticado.
+
+### 2. Obtener Categoría por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Acceso**: Cualquier usuario autenticado.
+
+### 3. Crear una Categoría
+
+*   **Endpoint**: `POST /`
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "name": "Sub-18 Femenino",
+      "description": "Categoría para jugadoras menores de 18 años."
+    }
+    ```
+
+### 4. Actualizar una Categoría
+
+*   **Endpoint**: `PUT /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "name": "Nuevo Nombre",
+      "description": "Nueva descripción."
+    }
+    ```
+
+### 5. Eliminar una Categoría
+
+*   **Endpoint**: `DELETE /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+
+### 6. Desasignar un Jugador de una Categoría
+
+*   **Endpoint**: `DELETE /:id/players/:playerId`
+*   **Descripción**: Elimina la asignación de un jugador a una categoría.
+*   **Acceso**: `ADMIN`, `COACH`.
+
+### 6. Asignar un Jugador a una Categoría
+
+*   **Endpoint**: `POST /:id/players`
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "playerId": 25
+    }
+    ```
+
+### 7. Asignar un Coach a una Categoría
+
+*   **Endpoint**: `POST /:id/coaches`
+*   **Descripción**: Asigna un coach a una categoría. La lógica de permisos es la siguiente:
+    *   Un `ADMIN` puede asignar cualquier usuario con rol `COACH`.
+    *   Un `COACH` solo puede asignarse a sí mismo (debe enviar su propio ID en el body).
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "coachId": 12
+    }
+    ```
+
+### 8. Desasignar un Coach de una Categoría
+
+*   **Endpoint**: `DELETE /:id/coaches/:coachId`
+*   **Descripción**: Elimina la asignación de un coach a una categoría. Un `COACH` solo puede desasignarse a sí mismo.
+*   **Acceso**: `ADMIN`, `COACH`.
+    ```
+
+---
+
+## Endpoints de Usuarios (`/api/users`)
+
+### 1. Obtener Todos los Usuarios
+
+*   **Endpoint**: `GET /`
+*   **Descripción**: Devuelve una lista de todos los usuarios del sistema.
+*   **Acceso**: `ADMIN`.
+
+### 2. Crear un Usuario
+
+*   **Endpoint**: `POST /`
+*   **Descripción**: Crea un nuevo usuario. La creación de perfiles (`profile`) es opcional.
+    *   Un `ADMIN` puede crear usuarios con rol `ADMIN`, `COACH`, o `PLAYER`.
+    *   Un `COACH` solo puede crear usuarios con rol `PLAYER`.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "email": "new.player@test.com",
+      "password": "password123",
+      "role": "PLAYER",
+      "profile": {
+        "full_name": "Nuevo Jugador",
+        "birth_date": "2008-05-20T00:00:00Z",
+        "position": "Setter"
+      }
+    }
+    ```
+
+### 3. Obtener Usuario por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Descripción**: Devuelve la información de un usuario específico.
+    *   Un `ADMIN` puede ver cualquier usuario.
+    *   Otros usuarios (`COACH`, `PLAYER`) solo pueden ver su propio perfil.
+*   **Acceso**: Cualquier usuario autenticado (con restricciones).
+
+### 4. Actualizar un Usuario
+
+*   **Endpoint**: `PUT /:id`
+*   **Descripción**: Actualiza la información de un usuario.
+    *   Un `ADMIN` puede actualizar cualquier usuario y cambiar su rol.
+    *   Otros usuarios solo pueden actualizar su propio perfil (email, datos de perfil, etc.), pero no su rol.
+*   **Acceso**: Cualquier usuario autenticado (con restricciones).
+*   **Body (Request)**:
+    ```json
+    {
+      "email": "updated.email@test.com",
+      "profile": {
+        "position": "Libero"
+      }
+    }
+    ```
+
+### 5. Eliminar un Usuario
+
+*   **Endpoint**: `DELETE /:id`
+*   **Descripción**: Elimina un usuario del sistema.
+*   **Acceso**: `ADMIN`.
+
+---
+
+## Endpoints de Eventos (`/api/events`)
+
+### 1. Obtener Todos los Eventos
+
+*   **Endpoint**: `GET /`
+*   **Descripción**: Devuelve una lista de todos los eventos, ordenados por fecha.
+*   **Acceso**: Cualquier usuario autenticado.
+
+### 2. Obtener Evento por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Descripción**: Devuelve los detalles de un evento específico, incluyendo sus partidos y detalles de práctica si aplica.
+*   **Acceso**: Cualquier usuario autenticado.
+
+### 3. Crear un Evento
+
+*   **Endpoint**: `POST /`
+*   **Descripción**: Crea un nuevo evento, que puede ser de tipo `PRACTICE` (práctica) o `MATCH` (jornada de partidos).
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    // Ejemplo para crear una PRÁCTICA
+    {
+      "name": "Entrenamiento de Saque y Recepción",
+      "type": "PRACTICE",
+      "date_time": "2024-08-15T18:00:00Z",
+      "location": "Gimnasio Principal",
+      "description": "Práctica enfocada en fundamentos.",
+      "categoryIds": [1, 2],
+      "practice": {
+        "objective": "Mejorar la efectividad del primer saque."
+      }
+    }
+    ```
+
+### 4. Actualizar un Evento
+
+*   **Endpoint**: `PUT /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+
+*   **Body (Request)**:
+    ```json
+    {
+      "name": "Nuevo Nombre del Evento",
+      "location": "Cancha Alterna",
+      "description": "Descripción actualizada."
+    }
+    ```
+
+### 5. Eliminar un Evento
+
+*   **Endpoint**: `DELETE /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+
+### 6. Añadir un Partido a un Evento
+
+*   **Endpoint**: `POST /:id/matches`
+*   **Descripción**: Crea un partido y lo asocia a un evento existente de tipo `MATCH` o `TOURNAMENT`.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "home_category_id": 1,
+      "away_category_id": 2
+    }
+    ```
