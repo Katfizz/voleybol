@@ -152,72 +152,162 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
 ### 1. Obtener Todos los Usuarios
 
 *   **Endpoint**: `GET /`
+*   **Descripción**: Devuelve una lista de todos los usuarios del sistema.
 *   **Acceso**: `ADMIN`.
 
-### 2. Crear un Nuevo Usuario
+### 2. Crear un Usuario
 
 *   **Endpoint**: `POST /`
-*   **Descripción**: Crea un nuevo usuario en el sistema. Esta acción requiere que un usuario ya esté autenticado.
-*   **Acceso**:
-    *   `ADMIN`: Puede crear `ADMIN`, `COACH`, y `PLAYER`.
-    *   `COACH`: Puede crear `PLAYER`.
-*   **Body (Request para PLAYER)**:
-    ```json
-    {
-      "email": "player@example.com",
-      "password": "password123",
-      "role": "PLAYER",
-      "profile": {
-        "full_name": "Juan Pérez",
-        "birthDate": "2005-08-15T00:00:00.000Z",
-        "contact_data": {
-          "phone": "123-456-7890",
-          "address": "Calle Falsa 123"
-        },
-        "representative_data": {
-          "name": "Maria Pérez",
-          "phone": "987-654-3210"
-        }
-      }
-    }
-    ```
-*   **Body (Request para COACH/ADMIN)**:
-    ```json
-    {
-      "email": "coach@example.com",
-      "password": "password123",
-      "role": "COACH"
-    }
-    ```
-*   **Respuesta (Success 201)**:
-    ```json
-    {
-      "ok": true,
-      "msg": "Usuario creado exitosamente.",
-      "user": { ... }
-    }
-    ```
-
-### 2. Obtener Usuario por ID
-
-*   **Endpoint**: `GET /:id`
-*   **Acceso**: `ADMIN` o el propio usuario.
-
-### 3. Actualizar un Usuario
-
-*   **Endpoint**: `PUT /:id`
-*   **Acceso**: `ADMIN` o el propio usuario. Solo un `ADMIN` puede cambiar el rol.
+*   **Descripción**: Crea un nuevo usuario. La creación de perfiles (`profile`) es opcional.
+    *   Un `ADMIN` puede crear usuarios con rol `ADMIN`, `COACH`, o `PLAYER`.
+    *   Un `COACH` solo puede crear usuarios con rol `PLAYER`.
+*   **Acceso**: `ADMIN`, `COACH`.
 *   **Body (Request)**:
     ```json
     {
-      "email": "nuevo@email.com",
+      "email": "new.player@test.com",
+      "password": "password123",
+      "role": "PLAYER",
       "profile": {
-        "full_name": "Nuevo Nombre Completo"
+        "full_name": "Nuevo Jugador",
+        "birth_date": "2008-05-20T00:00:00Z",
+        "position": "Setter"
       }
     }
     ```
 
-### 4. Eliminar un Usuario
+### 3. Obtener Usuario por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Descripción**: Devuelve la información de un usuario específico.
+    *   Un `ADMIN` puede ver cualquier usuario.
+    *   Otros usuarios (`COACH`, `PLAYER`) solo pueden ver su propio perfil.
+*   **Acceso**: Cualquier usuario autenticado (con restricciones).
+
+### 4. Actualizar un Usuario
+
+*   **Endpoint**: `PUT /:id`
+*   **Descripción**: Actualiza la información de un usuario.
+    *   Un `ADMIN` puede actualizar cualquier usuario y cambiar su rol.
+    *   Otros usuarios solo pueden actualizar su propio perfil (email, datos de perfil, etc.), pero no su rol.
+*   **Acceso**: Cualquier usuario autenticado (con restricciones).
+*   **Body (Request)**:
+    ```json
+    {
+      "email": "updated.email@test.com",
+      "profile": {
+        "position": "Libero"
+      }
+    }
+    ```
+
+### 5. Eliminar un Usuario
 
 *   **Endpoint**: `DELETE /:id`
+*   **Descripción**: Elimina un usuario del sistema.
 *   **Acceso**: `ADMIN`.
+
+---
+
+## Endpoints de Eventos (`/api/events`)
+
+### 1. Obtener Todos los Eventos
+
+*   **Endpoint**: `GET /`
+*   **Descripción**: Devuelve una lista de todos los eventos, ordenados por fecha.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "events": [
+            {
+                "id": 5,
+                "name": "Jornada de Sábado - Liga Juvenil",
+                "type": "MATCH",
+                "date_time": "2024-09-21T09:00:00.000Z",
+                "location": "Cancha Central",
+                "categories": [ { "id": 1, "name": "Equipo A" }, ... ],
+                "_count": {
+                    "matches": 2
+                }
+            }
+        ]
+    }
+    ```
+
+### 2. Obtener Evento por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Descripción**: Devuelve los detalles de un evento específico, incluyendo sus partidos y detalles de práctica si aplica.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "event": { ... "matches": [ { "id": 10, ... }, { "id": 11, ... } ] }
+    }
+    ```
+
+### 3. Crear un Evento
+
+*   **Endpoint**: `POST /`
+*   **Descripción**: Crea un nuevo evento, que puede ser de tipo `PRACTICE` (práctica) o `MATCH` (jornada de partidos).
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    // Ejemplo para crear una PRÁCTICA
+    {
+      "name": "Entrenamiento de Saque y Recepción",
+      "type": "PRACTICE",
+      "date_time": "2024-08-15T18:00:00Z",
+      "location": "Gimnasio Principal",
+      "description": "Práctica enfocada en fundamentos.",
+      "categoryIds": [1, 2],
+      "practice": {
+        "objective": "Mejorar la efectividad del primer saque."
+      }
+    }
+    // Ejemplo para crear una JORNADA DE PARTIDOS
+    {
+      "name": "Jornada de Fin de Semana - Liga Juvenil",
+      "type": "MATCH",
+      "date_time": "2024-08-17T09:00:00Z",
+      "location": "Cancha Central",
+      "description": "Partidos correspondientes a la fecha 5.",
+      "categoryIds": [1, 2, 3, 4]
+    }
+    ```
+
+### 4. Actualizar un Evento
+
+*   **Endpoint**: `PUT /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+
+*   **Body (Request)**:
+    ```json
+    {
+      "name": "Nuevo Nombre del Evento",
+      "location": "Cancha Alterna",
+      "description": "Descripción actualizada.",
+      "categoryIds": [3, 4]
+    }
+    ```
+
+### 5. Eliminar un Evento
+
+*   **Endpoint**: `DELETE /:id`
+*   **Acceso**: `ADMIN`, `COACH`.
+
+### 6. Añadir un Partido a un Evento
+
+*   **Endpoint**: `POST /:id/matches`
+*   **Descripción**: Crea un partido y lo asocia a un evento existente de tipo `MATCH` o `TOURNAMENT`.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "home_category_id": 1,
+      "away_category_id": 2
+    }
+    ```
