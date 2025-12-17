@@ -311,3 +311,43 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
       "away_category_id": 2
     }
     ```
+
+---
+
+## Endpoints de Partidos (`/api/matches`)
+
+### 1. Registrar Resultados de un Partido
+
+*   **Endpoint**: `PUT /:id/results`
+*   **Descripción**: Registra o actualiza los resultados de los sets para un partido específico. El sistema recalcula los sets ganados y el ganador del partido.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "sets": [
+        { "set_number": 1, "home_score": 25, "away_score": 20 },
+        { "set_number": 2, "home_score": 23, "away_score": 25 },
+        { "set_number": 3, "home_score": 25, "away_score": 22 }
+      ]
+    }
+    ```
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "match": { ...el objeto del partido actualizado con sus sets... }
+    }
+    ```
+
+### 2. Eliminar un Partido
+
+*   **Endpoint**: `DELETE /:id`
+*   **Descripción**: Elimina un partido de la base de datos.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "msg": "Partido eliminado exitosamente."
+    }
+    ```
