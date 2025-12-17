@@ -1,24 +1,22 @@
-const { response } = require('express');
 const authService = require('../services/auth.service');
-const { handleHttpError } = require('../utils/errors');
 
-const login = async (req, res = response) => {
+const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const { user, token } = await authService.loginUser({ email, password });
+        const data = await authService.loginUser({ email, password });
 
-        res.status(200).json({
+        res.json({
             ok: true,
             msg: 'Inicio de sesión exitoso',
-            user,
-            token
+            user: data.user,
+            token: data.token
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const register = async (req, res = response) => {
+const register = async (req, res, next) => {
     try {
         const user = await authService.registerUser(req.body, req.user);
 
@@ -28,7 +26,7 @@ const register = async (req, res = response) => {
             user
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 }
 

@@ -1,10 +1,9 @@
 const { getProfile } = require('../services/profile.service');
-const { handleHttpError } = require('../utils/errors');
 
 /**
  * Controlador para obtener el perfil del usuario autenticado.
  */
-const getProfileController = async (req, res) => {
+const getProfileController = async (req, res, next) => {
     try {
         // El ID del usuario se obtiene del token JWT, que ya fue validado
         // por el middleware `validateJWT` y adjuntado a `req.user`.
@@ -14,7 +13,7 @@ const getProfileController = async (req, res) => {
             profile: userProfile,
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
