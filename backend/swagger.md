@@ -316,7 +316,60 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
 
 ## Endpoints de Partidos (`/api/matches`)
 
-### 1. Registrar Resultados de un Partido
+### 1. Obtener Todos los Partidos
+
+*   **Endpoint**: `GET /`
+*   **Descripción**: Devuelve una lista de todos los partidos con información básica de los equipos y el evento.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "matches": [
+            {
+                "id": 2,
+                "event_id": 1,
+                "home_category_id": 1,
+                "away_category_id": 2,
+                "home_sets_won": 2,
+                "away_sets_won": 1,
+                "winner_category_id": 1,
+                "event": { "name": "Jornada de Fin de Semana" },
+                "homeCategory": { "name": "Sub-17 Masculino" },
+                "awayCategory": { "name": "Sub-19 Masculino" },
+                "winnerCategory": { "name": "Sub-17 Masculino" }
+            }
+        ]
+    }
+    ```
+
+### 2. Obtener Partido por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Descripción**: Devuelve los detalles completos de un partido, incluyendo todos sus sets.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "match": {
+            "id": 2,
+            "event_id": 1,
+            "home_category_id": 1,
+            "away_category_id": 2,
+            "home_sets_won": 2,
+            "away_sets_won": 1,
+            "winner_category_id": 1,
+            "event": { "name": "Jornada de Fin de Semana" },
+            "homeCategory": { "name": "Sub-17 Masculino" },
+            "awayCategory": { "name": "Sub-19 Masculino" },
+            "winnerCategory": { "name": "Sub-17 Masculino" },
+            "sets": [ { ... } ]
+        }
+    }
+    ```
+
+### 3. Registrar Resultados de un Partido
 
 *   **Endpoint**: `PUT /:id/results`
 *   **Descripción**: Registra o actualiza los resultados de los sets para un partido específico. El sistema recalcula los sets ganados y el ganador del partido.
@@ -339,7 +392,7 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
     }
     ```
 
-### 2. Eliminar un Partido
+### 4. Eliminar un Partido
 
 *   **Endpoint**: `DELETE /:id`
 *   **Descripción**: Elimina un partido de la base de datos.

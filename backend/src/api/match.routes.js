@@ -9,11 +9,15 @@ const router = express.Router();
 // Todas las rutas de partidos requieren autenticación
 router.use(validateJWT);
 
-// Todas las rutas de este archivo requieren rol de ADMIN o COACH
-router.use(hasRole(Role.ADMIN, Role.COACH));
+// --- Rutas de lectura (GET) para cualquier usuario autenticado ---
+router.get('/', matchController.getAllMatches);
+router.get('/:id', validateMatchId, matchController.getMatchById);
+
+// --- Rutas de escritura (PUT, DELETE) solo para ADMIN o COACH ---
 
 router.put(
     '/:id/results',
+    hasRole(Role.ADMIN, Role.COACH),
     validateMatchId,
     validateRecordResults,
     matchController.recordResults
@@ -21,6 +25,7 @@ router.put(
 
 router.delete(
     '/:id',
+    hasRole(Role.ADMIN, Role.COACH),
     validateMatchId,
     matchController.deleteMatch
 );

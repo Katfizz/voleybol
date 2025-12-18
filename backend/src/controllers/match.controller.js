@@ -17,6 +17,31 @@ const recordResults = async (req, res, next) => {
 };
 
 /**
+ * Controlador para obtener todos los partidos.
+ */
+const getAllMatches = async (req, res, next) => {
+    try {
+        const matches = await matchService.getAllMatches();
+        res.status(200).json({ ok: true, matches });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Controlador para obtener un partido por su ID.
+ */
+const getMatchById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const match = await matchService.getMatchById(id);
+        res.status(200).json({ ok: true, match });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Controlador para eliminar un partido.
  */
 const deleteMatch = async (req, res, next) => {
@@ -32,5 +57,7 @@ const deleteMatch = async (req, res, next) => {
 
 module.exports = {
     recordResults,
+    getAllMatches,
+    getMatchById,
     deleteMatch,
 };

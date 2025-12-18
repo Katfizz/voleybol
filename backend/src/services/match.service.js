@@ -51,9 +51,19 @@ const recordMatchResults = async (matchId, sets) => {
                 home_score,
                 away_score,
                 match_id: id,
-                winner_id: winnerId,
+                winner_category_id: winnerId,
             };
         });
+
+        /*
+         * --- VALIDACIÓN DE PARTIDO FINALIZADO (COMENTADA) ---
+         * Esta sección puede ser descomentada para forzar que solo se registren
+         * resultados de partidos completos (ej. al mejor de 5 sets).
+         * const isMatchFinished = Math.max(homeSetsWon, awaySetsWon) === 3;
+         * if (!isMatchFinished) {
+         *     throw new BadRequestError(`El resultado ${homeSetsWon}-${awaySetsWon} no es un resultado final válido. Un equipo debe ganar 3 sets.`);
+         * }
+         */
 
         // 4. Crear todos los nuevos sets en la base de datos.
         await tx.set.createMany({ data: setsToCreate });
@@ -67,13 +77,62 @@ const recordMatchResults = async (matchId, sets) => {
             data: {
                 home_sets_won: homeSetsWon,
                 away_sets_won: awaySetsWon,
-                winner_id: matchWinnerId,
+                winner_category_id: matchWinnerId,
             },
-            include: { sets: true, winner: { select: { name: true } } } // Devolver info útil
+            include: { sets: true, winnerCategory: { select: { name: true } } } // Devolver info útil
         });
 
         return updatedMatch;
     });
+};
+
+/**
+ * Obtiene una lista de todos los partidos.
+ * @returns {Promise<Array<object>>} Un arreglo de partidos.
+ */
+const getAllMatches = async () => {
+    const matches = await prisma.match.findMany({
+        include: {
+            event: { select: { name: true } },
+            homeCategory: { select: { name: true } },
+            awayCategory: { select: { name: true } },
+            winnerCategory: { select: { name: true } },
+        },
+        orderBy: {
+            id: 'desc' // Muestra los partidos más recientes primero
+        }
+    });
+    return matches;
+};
+
+/**
+ * Obtiene un partido específico por su ID.
+ * @param {string} matchId - El ID del partido.
+ * @returns {Promise<object>} El objeto del partido con sus datos relacionados.
+ */
+const getMatchById = async (matchId) => {
+    const id = parseInt(matchId, 10);
+
+    const match = await prisma.match.findUnique({
+        where: { id },
+        include: {
+            event: { select: { name: true } },
+            homeCategory: { select: { name: true } },
+            awayCategory: { select: { name: true } },
+            winnerCategory: { select: { name: true } },
+            sets: {
+                orderBy: {
+                    set_number: 'asc' // Asegura que los sets vengan ordenados
+                }
+            }
+        }
+    });
+
+    if (!match) {
+        throw new NotFoundError(`No se encontró un partido con el ID ${id}.`);
+    }
+
+    return match;
 };
 
 /**
@@ -99,5 +158,7 @@ const deleteMatch = async (matchId) => {
 
 module.exports = {
     recordMatchResults,
+    getAllMatches,
+    getMatchById,
     deleteMatch,
 };
