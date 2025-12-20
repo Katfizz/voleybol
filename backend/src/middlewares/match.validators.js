@@ -1,4 +1,4 @@
-const { check } = require('express-validator');
+const { check, body, param } = require('express-validator');
 const { validateFields } = require('./validate-fields');
 
 const matchCreationValidation = [
@@ -10,9 +10,32 @@ const matchCreationValidation = [
             }
             return true;
         }),
-    validateFields
+    validateFields,
+];
+
+const validateRecordResults = [
+    body('sets')
+        .isArray({ min: 1 }).withMessage('El campo "sets" debe ser un arreglo con al menos un elemento.'),
+
+    body('sets.*.set_number')
+        .isInt({ gt: 0 }).withMessage('El "set_number" debe ser un número entero positivo.'),
+
+    body('sets.*.home_score')
+        .isInt({ min: 0 }).withMessage('El "home_score" debe ser un número entero no negativo.'),
+
+    body('sets.*.away_score')
+        .isInt({ min: 0 }).withMessage('El "away_score" debe ser un número entero no negativo.'),
+
+    validateFields,
+];
+
+const validateMatchId = [
+    param('id').isInt().withMessage('El ID del partido debe ser un número entero.'),
+    validateFields,
 ];
 
 module.exports = {
     matchCreationValidation,
+    validateRecordResults,
+    validateMatchId,
 };

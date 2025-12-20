@@ -1,8 +1,6 @@
-const { response } = require('express');
 const userService = require('../services/users.service');
-const { handleHttpError } = require('../utils/errors');
 
-const createUser = async (req, res = response) => {
+const createUser = async (req, res, next) => {
     try {
         const user = await userService.createUser(req.body, req.user);
 
@@ -12,11 +10,11 @@ const createUser = async (req, res = response) => {
             user
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const getAllUsers = async (req, res = response) => {
+const getAllUsers = async (req, res, next) => {
     try {
         const users = await userService.getAllUsers();
         res.status(200).json({
@@ -24,11 +22,11 @@ const getAllUsers = async (req, res = response) => {
             users
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const getUserById = async (req, res = response) => {
+const getUserById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const user = await userService.getUserById(id);
@@ -37,11 +35,11 @@ const getUserById = async (req, res = response) => {
             user
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const updateUser = async (req, res = response) => {
+const updateUser = async (req, res, next) => {
     try {
         const { id } = req.params;
         const updatedUser = await userService.updateUser(id, req.body, req.user);
@@ -51,11 +49,11 @@ const updateUser = async (req, res = response) => {
             user: updatedUser
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const deleteUser = async (req, res = response) => {
+const deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params;
         const result = await userService.deleteUser(id, req.user);
@@ -64,7 +62,7 @@ const deleteUser = async (req, res = response) => {
             msg: result.message
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 

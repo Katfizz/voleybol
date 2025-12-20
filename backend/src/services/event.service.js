@@ -104,6 +104,12 @@ const getEventById = async (eventId) => {
                 include: {
                     homeCategory: { select: { id: true, name: true } },
                     awayCategory: { select: { id: true, name: true } },
+                    winnerCategory: { select: { id: true, name: true } }, // Incluir quién ganó
+                    sets: {
+                        orderBy: {
+                            set_number: 'asc' // Incluir los sets ordenados para mostrar el marcador
+                        }
+                    }
                 }
             },
         }

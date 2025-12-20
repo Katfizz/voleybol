@@ -63,21 +63,29 @@ class NotFoundError extends AppError {
 /**
  * Manejador de errores HTTP centralizado para los controladores.
  * Envía una respuesta JSON con el código de estado y mensaje adecuados.
- * @param {object} res - El objeto de respuesta de Express.
  * @param {Error} error - El error capturado.
+ * @param {object} req - El objeto de petición de Express.
+ * @param {object} res - El objeto de respuesta de Express.
+ * @param {function} next - La función para pasar al siguiente middleware.
  */
-const handleHttpError = (res, error) => {
+const handleHttpError = (error, req, res, next) => {
     console.error("API Error:", error.message); // Log del error para debugging
 
     if (error instanceof AppError) {
         return res.status(error.statusCode).json({
             ok: false,
-            msg: error.message
+            error: {
+                message: error.message,
+                statusCode: error.statusCode,
+            }
         });
     }
     
     // Para cualquier otro tipo de error, devolver un 500 genérico.
-    return res.status(500).json({ ok: false, msg: 'Error interno del servidor.' });
+    return res.status(500).json({
+        ok: false,
+        error: { message: 'Error interno del servidor.', statusCode: 500 }
+    });
 };
 
 module.exports = {

@@ -1,7 +1,6 @@
 const categoryService = require('../services/category.service');
-const { handleHttpError } = require('../utils/errors');
 
-const createCategoryController = async (req, res) => {
+const createCategoryController = async (req, res, next) => {
     try {
         const category = await categoryService.createCategory(req.body, req.user);
         res.status(201).json({
@@ -10,11 +9,11 @@ const createCategoryController = async (req, res) => {
             category,
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const assignPlayerController = async (req, res) => {
+const assignPlayerController = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { playerId } = req.body;
@@ -25,47 +24,47 @@ const assignPlayerController = async (req, res) => {
             category: updatedCategory,
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const getAllCategoriesController = async (req, res) => {
+const getAllCategoriesController = async (req, res, next) => {
     try {
         const categories = await categoryService.getAllCategories();
         res.json({ ok: true, categories });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const getCategoryByIdController = async (req, res) => {
+const getCategoryByIdController = async (req, res, next) => {
     try {
         const category = await categoryService.getCategoryById(req.params.id);
         res.json({ ok: true, category });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const updateCategoryController = async (req, res) => {
+const updateCategoryController = async (req, res, next) => {
     try {
         const category = await categoryService.updateCategory(req.params.id, req.body);
         res.json({ ok: true, msg: 'Categoría actualizada exitosamente.', category });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const deleteCategoryController = async (req, res) => {
+const deleteCategoryController = async (req, res, next) => {
     try {
         await categoryService.deleteCategory(req.params.id);
         res.json({ ok: true, msg: 'Categoría eliminada exitosamente.' });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const assignCoachController = async (req, res) => {
+const assignCoachController = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { coachId } = req.body; // El ID del coach viene del body
@@ -76,11 +75,11 @@ const assignCoachController = async (req, res) => {
             category: updatedCategory,
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const removePlayerFromCategoryController = async (req, res) => {
+const removePlayerFromCategoryController = async (req, res, next) => {
     try {
         const { id, playerId } = req.params;
         const updatedCategory = await categoryService.removePlayerFromCategory(id, playerId, req.user);
@@ -90,11 +89,11 @@ const removePlayerFromCategoryController = async (req, res) => {
             category: updatedCategory,
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
-const removeCoachFromCategoryController = async (req, res) => {
+const removeCoachFromCategoryController = async (req, res, next) => {
     try {
         const { id, coachId } = req.params;
         const updatedCategory = await categoryService.removeCoachFromCategory(id, coachId, req.user);
@@ -104,7 +103,7 @@ const removeCoachFromCategoryController = async (req, res) => {
             category: updatedCategory,
         });
     } catch (error) {
-        handleHttpError(res, error);
+        next(error);
     }
 };
 
