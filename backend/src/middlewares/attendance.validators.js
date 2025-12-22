@@ -1,5 +1,5 @@
 const { body, param, query } = require('express-validator');
-const { validateFields } = require('./validateFields');
+const { validateFields } = require('./validate-fields');
 
 const validateEventId = [
     param('eventId')
