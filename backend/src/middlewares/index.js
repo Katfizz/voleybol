@@ -3,6 +3,7 @@ const authValidators = require('./auth.validators');
 const userValidators = require('./user.validators');
 const eventValidators = require('./event.validators');
 const matchValidators = require('./match.validators');
+const attendanceValidators = require('./attendance.validators');
 const validateFields = require('./validate-fields');
 
 module.exports = {
@@ -11,5 +12,6 @@ module.exports = {
     ...userValidators,
     ...eventValidators,
     ...matchValidators,
+    ...attendanceValidators,
     ...validateFields,
 };

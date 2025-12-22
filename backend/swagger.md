@@ -404,3 +404,73 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
         "msg": "Partido eliminado exitosamente."
     }
     ```
+
+---
+
+## Endpoints de Asistencia (`/api/attendance`)
+
+### 1. Obtener Asistencia de un Evento
+
+*   **Endpoint**: `GET /event/:eventId`
+*   **Descripción**: Obtiene la lista de asistencia para un evento específico. Se puede filtrar por fecha si el evento dura varios días.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Query Params**:
+    *   `date` (Opcional): Fecha en formato `YYYY-MM-DD` para filtrar la asistencia de un día específico.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "attendance": [
+            {
+                "id": 1,
+                "date": "2024-09-21T00:00:00.000Z",
+                "player_profile_id": 10,
+                "event_id": 5,
+                "status": "PRESENT",
+                "notes": null,
+                "player_profile": {
+                    "full_name": "Juan Pérez",
+                    "position": "Setter"
+                }
+            }
+        ]
+    }
+    ```
+
+### 2. Registrar Asistencia
+
+*   **Endpoint**: `POST /event/:eventId`
+*   **Descripción**: Registra o actualiza la asistencia de múltiples jugadores para un evento en una fecha específica.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "date": "2024-09-21",
+      "attendances": [
+        { "player_profile_id": 10, "status": "PRESENT" },
+        { "player_profile_id": 11, "status": "ABSENT", "notes": "Enfermedad" },
+        { "player_profile_id": 12, "status": "EXCUSED" }
+      ]
+    }
+    ```
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "msg": "Asistencia registrada exitosamente.",
+        "results": [ ...registros actualizados... ]
+    }
+    ```
+
+### 3. Eliminar Registro de Asistencia
+
+*   **Endpoint**: `DELETE /:id`
+*   **Descripción**: Elimina un registro de asistencia específico por su ID.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "msg": "Registro de asistencia eliminado."
+    }
+    ```
