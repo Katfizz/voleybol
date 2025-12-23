@@ -431,6 +431,9 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
                 "player_profile": {
                     "full_name": "Juan Pérez",
                     "position": "Setter"
+                },
+                "recorded_by": {
+                    "email": "coach@example.com"
                 }
             }
         ]

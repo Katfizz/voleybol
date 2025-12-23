@@ -6,12 +6,13 @@ const { NotFoundError, BadRequestError, ConflictError } = require('../utils/erro
  * @param {string} eventId - ID del evento.
  * @param {string|Date} date - Fecha de la asistencia (YYYY-MM-DD).
  * @param {Array<object>} attendanceList - Lista de objetos { player_profile_id, status, notes }.
- * @param {number} registrarId - ID del usuario que registra la asistencia.
+ * @param {number} recorderId - ID del usuario que registra la asistencia.
  * @returns {Promise<Array<object>>} Los registros de asistencia procesados.
  */
-const recordEventAttendance = async (eventId, date, attendanceList, registrarId) => {
+const recordEventAttendance = async (eventId, date, attendanceList, recorderId) => {
     const id = parseInt(eventId, 10);
     const attendanceDate = new Date(date); // Asegura formato fecha
+    const recorderIdInt = recorderId ? parseInt(recorderId, 10) : null;
 
     // 1. Verificar que el evento exista
     const event = await prisma.event.findUnique({
@@ -94,7 +95,7 @@ const recordEventAttendance = async (eventId, date, attendanceList, registrarId)
                 update: {
                     status,
                     notes,
-                    recorded_by_id: registrarId
+                    recorded_by_id: recorderIdInt
                 },
                 create: {
                     event_id: id,
@@ -102,7 +103,7 @@ const recordEventAttendance = async (eventId, date, attendanceList, registrarId)
                     date: attendanceDate,
                     status,
                     notes,
-                    recorded_by_id: registrarId
+                    recorded_by_id: recorderIdInt
                 }
             });
             results.push(entry);
