@@ -22,6 +22,7 @@ model User {
 
   // Relación muchos a muchos: Un coach puede gestionar varias categorías
   managedCategories Category[] @relation("CoachToCategory")
+  recordedAttendances Attendance[] @relation("RecordedBy")
 
   @@map("users")
 }
@@ -80,13 +81,17 @@ model Event {
 
 model Attendance {
   id                Int           @id @default(autoincrement())
+  date              DateTime      @db.Date
   player_profile    PlayerProfile @relation(fields: [player_profile_id], references: [id])
   player_profile_id Int
   event             Event         @relation(fields: [event_id], references: [id])
   event_id          Int
   status            AttendanceStatus
+  notes             String?
+  recorded_by_id    Int?
+  recorded_by       User?         @relation("RecordedBy", fields: [recorded_by_id], references: [id])
 
-  @@unique([player_profile_id, event_id])
+  @@unique([player_profile_id, event_id, date])
   @@map("attendances")
 }
 

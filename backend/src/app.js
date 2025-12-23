@@ -6,6 +6,7 @@ const categoryRoutes = require('./api/category.routes');
 const profileRoutes = require('./api/profile.routes');
 const eventRoutes = require('./api/event.routes');
 const matchRoutes = require('./api/match.routes');
+const attendanceRoutes = require('./api/attendance.routes');
 const { handleHttpError } = require('./utils/errors');
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/matches', matchRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 // Manejador de errores global (debe ir al final)
 app.use(handleHttpError);
