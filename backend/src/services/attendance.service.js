@@ -6,9 +6,10 @@ const { NotFoundError, BadRequestError, ConflictError } = require('../utils/erro
  * @param {string} eventId - ID del evento.
  * @param {string|Date} date - Fecha de la asistencia (YYYY-MM-DD).
  * @param {Array<object>} attendanceList - Lista de objetos { player_profile_id, status, notes }.
+ * @param {number} registrarId - ID del usuario que registra la asistencia.
  * @returns {Promise<Array<object>>} Los registros de asistencia procesados.
  */
-const recordEventAttendance = async (eventId, date, attendanceList) => {
+const recordEventAttendance = async (eventId, date, attendanceList, registrarId) => {
     const id = parseInt(eventId, 10);
     const attendanceDate = new Date(date); // Asegura formato fecha
 
@@ -92,14 +93,16 @@ const recordEventAttendance = async (eventId, date, attendanceList) => {
                 },
                 update: {
                     status,
-                    notes
+                    notes,
+                    recorded_by_id: registrarId
                 },
                 create: {
                     event_id: id,
                     player_profile_id: playerId,
                     date: attendanceDate,
                     status,
-                    notes
+                    notes,
+                    recorded_by_id: registrarId
                 }
             });
             results.push(entry);
@@ -125,7 +128,8 @@ const getEventAttendance = async (eventId, date) => {
     return prisma.attendance.findMany({
         where: whereClause,
         include: {
-            player_profile: { select: { full_name: true, position: true } }
+            player_profile: { select: { full_name: true, position: true } },
+            recorded_by: { select: { email: true } } // Incluimos info de quién registró
         },
         orderBy: { player_profile: { full_name: 'asc' } }
     });

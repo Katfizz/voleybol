@@ -7,9 +7,10 @@ const recordAttendance = async (req, res, next) => {
     try {
         const { eventId } = req.params;
         const { date, attendances } = req.body;
+        const { id: registrarId } = req.user; // Obtenemos el ID del usuario autenticado
 
         // attendances debe ser un array: [{ player_profile_id: 1, status: 'PRESENT', notes: '' }, ...]
-        const results = await attendanceService.recordEventAttendance(eventId, date, attendances);
+        const results = await attendanceService.recordEventAttendance(eventId, date, attendances, registrarId);
 
         res.status(200).json({ ok: true, msg: 'Asistencia registrada exitosamente.', results });
     } catch (error) {
