@@ -4,6 +4,7 @@ const userValidators = require('./user.validators');
 const eventValidators = require('./event.validators');
 const matchValidators = require('./match.validators');
 const attendanceValidators = require('./attendance.validators');
+const announcementValidators = require('./announcement.validators');
 const validateFields = require('./validate-fields');
 
 module.exports = {
@@ -13,5 +14,6 @@ module.exports = {
     ...eventValidators,
     ...matchValidators,
     ...attendanceValidators,
+    ...announcementValidators,
     ...validateFields,
 };
