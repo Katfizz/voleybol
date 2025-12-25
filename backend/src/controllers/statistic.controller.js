@@ -4,7 +4,8 @@ const recordStats = async (req, res, next) => {
     try {
         const { matchId } = req.params;
         const { stats } = req.body; // Array de stats
-        const results = await statisticService.recordMatchStatistics(matchId, stats);
+        const { id: userId } = req.user;
+        const results = await statisticService.recordMatchStatistics(matchId, stats, userId);
         res.status(200).json({ ok: true, msg: 'Estadísticas registradas.', results });
     } catch (error) {
         next(error);
@@ -36,4 +37,25 @@ const getMatchStats = async (req, res, next) => {
     }
 };
 
-module.exports = { recordStats, getPlayerStats, getMatchStats };
+const updateStats = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { id: userId } = req.user;
+        const updatedStat = await statisticService.updateStatistic(id, req.body, userId);
+        res.status(200).json({ ok: true, msg: 'Estadística actualizada.', stat: updatedStat });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deleteStats = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await statisticService.deleteStatistic(id);
+        res.status(200).json({ ok: true, msg: 'Estadística eliminada.' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { recordStats, getPlayerStats, getMatchStats, updateStats, deleteStats };

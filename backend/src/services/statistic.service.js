@@ -5,8 +5,9 @@ const { NotFoundError, BadRequestError } = require('../utils/errors');
  * Registra o actualiza estadísticas para un partido específico.
  * Recibe un array de estadísticas por jugador.
  */
-const recordMatchStatistics = async (matchId, statsList) => {
+const recordMatchStatistics = async (matchId, statsList, userId) => {
     const mId = parseInt(matchId, 10);
+    const userIdInt = userId ? parseInt(userId, 10) : null;
 
     // Verificar existencia del partido
     const match = await prisma.match.findUnique({ where: { id: mId } });
@@ -37,11 +38,11 @@ const recordMatchStatistics = async (matchId, statsList) => {
                         match_id: mId
                     }
                 },
-                update: { points, kills, errors, aces, blocks, assists, digs },
+                update: { points, kills, errors, aces, blocks, assists, digs, last_updated_by_id: userIdInt },
                 create: {
                     match_id: mId,
                     player_profile_id: pId,
-                    points, kills, errors, aces, blocks, assists, digs
+                    points, kills, errors, aces, blocks, assists, digs, last_updated_by_id: userIdInt
                 }
             });
             results.push(entry);
@@ -108,14 +109,48 @@ const getMatchStatistics = async (matchId) => {
     return prisma.statistic.findMany({
         where: { match_id: mId },
         include: {
-            player_profile: { select: { full_name: true, position: true } }
+            player_profile: { select: { full_name: true, position: true } },
+            last_updated_by: { select: { email: true } }
         }
     });
+};
+
+/**
+ * Actualiza una estadística específica por su ID.
+ */
+const updateStatistic = async (id, data, userId) => {
+    const statId = parseInt(id, 10);
+    const userIdInt = userId ? parseInt(userId, 10) : null;
+    
+    const existingStat = await prisma.statistic.findUnique({ where: { id: statId } });
+    if (!existingStat) {
+        throw new NotFoundError(`Estadística con ID ${statId} no encontrada.`);
+    }
+
+    return prisma.statistic.update({
+        where: { id: statId },
+        data: {
+            ...data,
+            last_updated_by_id: userIdInt
+        }
+    });
+};
+
+/**
+ * Elimina una estadística específica por su ID.
+ */
+const deleteStatistic = async (id) => {
+    const statId = parseInt(id, 10);
+    // Prisma lanza error si no existe al usar delete, pero podemos verificar antes si queremos un mensaje personalizado
+    // O dejar que Prisma maneje la excepción P2025 (Record not found)
+    return prisma.statistic.delete({ where: { id: statId } });
 };
 
 module.exports = {
     recordMatchStatistics,
     getPlayerStatistics,
     getPlayerSummary,
-    getMatchStatistics
+    getMatchStatistics,
+    updateStatistic,
+    deleteStatistic
 };

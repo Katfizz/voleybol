@@ -477,3 +477,148 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
         "msg": "Registro de asistencia eliminado."
     }
     ```
+
+---
+
+## Endpoints de Estadísticas (`/api/statistics`)
+
+### 1. Registrar Estadísticas de Partido
+
+*   **Endpoint**: `POST /match/:matchId`
+*   **Descripción**: Registra o actualiza las estadísticas individuales de los jugadores para un partido específico.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "stats": [
+        {
+          "player_profile_id": 10,
+          "points": 15,
+          "kills": 12,
+          "errors": 3,
+          "aces": 2,
+          "blocks": 1,
+          "assists": 0,
+          "digs": 5
+        },
+        {
+          "player_profile_id": 11,
+          "points": 5,
+          "digs": 10
+        }
+      ]
+    }
+    ```
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "msg": "Estadísticas registradas.",
+        "results": [ ... ]
+    }
+    ```
+
+### 2. Obtener Estadísticas de un Partido
+
+*   **Endpoint**: `GET /match/:matchId`
+*   **Descripción**: Obtiene las estadísticas de todos los jugadores que participaron en un partido específico.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "stats": [
+            {
+                "id": 1,
+                "player_profile_id": 10,
+                "match_id": 5,
+                "points": 15,
+                "kills": 12,
+                "errors": 3,
+                "aces": 2,
+                "blocks": 1,
+                "assists": 0,
+                "digs": 5,
+                "player_profile": {
+                    "full_name": "Juan Pérez",
+                    "position": "Opuesto"
+                },
+                "last_updated_by": {
+                    "email": "coach@example.com"
+                }
+            }
+        ]
+    }
+    ```
+
+### 3. Obtener Estadísticas de un Jugador
+
+*   **Endpoint**: `GET /player/:playerProfileId`
+*   **Descripción**: Obtiene el historial de estadísticas de un jugador y un resumen acumulado de su rendimiento.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "history": [ ...lista de partidos y stats... ],
+        "summary": {
+            "matches_played": 10,
+            "totals": {
+                "points": 150,
+                "kills": 120,
+                "blocks": 15,
+                "aces": 10,
+                "assists": 5,
+                "digs": 50,
+                "errors": 20
+            },
+            "averages": {
+                "points": 15,
+                "kills": 12,
+                "blocks": 1.5,
+                "aces": 1,
+                "assists": 0.5,
+                "digs": 5,
+                "errors": 2
+            }
+        }
+    }
+    ```
+
+### 4. Actualizar Estadística (Corrección)
+
+*   **Endpoint**: `PATCH /:id`
+*   **Descripción**: Actualiza campos específicos de un registro de estadística existente (por ejemplo, para corregir un error de digitación).
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "points": 16,
+      "errors": 2
+    }
+    ```
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "msg": "Estadística actualizada.",
+        "stat": {
+            "id": 1,
+            "last_updated_by_id": 5,
+            ...
+        }
+    }
+    ```
+
+### 5. Eliminar Estadística
+
+*   **Endpoint**: `DELETE /:id`
+*   **Descripción**: Elimina un registro de estadística específico (por ejemplo, si se asignó a un jugador que no jugó).
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "msg": "Estadística eliminada."
+    }
+    ```

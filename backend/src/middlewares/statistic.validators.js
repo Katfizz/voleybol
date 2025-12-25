@@ -15,4 +15,22 @@ const validateRecordStats = [
     validateFields
 ];
 
-module.exports = { validateRecordStats };
+const validateStatId = [
+    param('id').isInt().withMessage('El ID de la estadística debe ser un número entero.'),
+    validateFields
+];
+
+const validateUpdateStats = [
+    param('id').isInt().withMessage('El ID de la estadística debe ser un número entero.'),
+    body('points').optional().isInt({ min: 0 }),
+    body('kills').optional().isInt({ min: 0 }),
+    body('errors').optional().isInt({ min: 0 }),
+    body('aces').optional().isInt({ min: 0 }),
+    body('blocks').optional().isInt({ min: 0 }),
+    body('assists').optional().isInt({ min: 0 }),
+    body('digs').optional().isInt({ min: 0 }),
+    body().custom(body => Object.keys(body).length > 0).withMessage('Debe enviar al menos un campo para actualizar.'),
+    validateFields
+];
+
+module.exports = { validateRecordStats, validateStatId, validateUpdateStats };
