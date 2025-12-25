@@ -477,3 +477,62 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
         "msg": "Registro de asistencia eliminado."
     }
     ```
+
+---
+
+## Endpoints de Anuncios (`/api/announcements`)
+
+### 1. Obtener Anuncios Activos
+
+*   **Endpoint**: `GET /`
+*   **Descripción**: Obtiene la lista de anuncios vigentes (cuya fecha de inicio ya pasó y fecha de fin no ha llegado).
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "announcements": [
+            {
+                "id": 1,
+                "title": "Torneo de Fin de Semana",
+                "content": "Recordatorio del torneo...",
+                "valid_from": "2024-10-20T00:00:00.000Z",
+                "valid_until": "2024-10-22T00:00:00.000Z",
+                "created_at": "2024-10-15T10:00:00.000Z",
+                "author": {
+                    "email": "admin@example.com",
+                    "profile": { "full_name": "Admin User" }
+                }
+            }
+        ]
+    }
+    ```
+
+### 2. Obtener Todos los Anuncios (Historial)
+
+*   **Endpoint**: `GET /all`
+*   **Descripción**: Obtiene el historial completo de anuncios, incluyendo expirados y futuros.
+*   **Acceso**: `ADMIN`.
+
+### 3. Crear un Anuncio
+
+*   **Endpoint**: `POST /`
+*   **Descripción**: Crea un nuevo anuncio. Se puede programar su vigencia.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "title": "Suspensión de Práctica",
+      "content": "Debido a lluvia se suspende la práctica de hoy.",
+      "valid_from": "2024-10-25T14:00:00Z", // Opcional (default: ahora)
+      "valid_until": "2024-10-26T00:00:00Z" // Opcional (default: permanente)
+    }
+    ```
+
+### 4. Eliminar un Anuncio
+
+*   **Endpoint**: `DELETE /:id`
+*   **Descripción**: Elimina un anuncio.
+    *   `ADMIN`: Puede eliminar cualquier anuncio.
+    *   `COACH`: Solo puede eliminar anuncios creados por él mismo.
+*   **Acceso**: `ADMIN`, `COACH`.

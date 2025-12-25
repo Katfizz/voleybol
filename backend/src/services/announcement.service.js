@@ -1,11 +1,20 @@
 const prisma = require('../db/prisma');
-const { NotFoundError, BadRequestError } = require('../utils/errors');
+const { NotFoundError, BadRequestError, ConflictError } = require('../utils/errors');
 
 /**
  * Crea un nuevo anuncio.
  */
 const createAnnouncement = async (userId, data) => {
     const { title, content, valid_from, valid_until } = data;
+
+    // Verificar si ya existe un anuncio idéntico (mismo título y contenido)
+    const existingAnnouncement = await prisma.announcement.findFirst({
+        where: { title, content }
+    });
+
+    if (existingAnnouncement) {
+        throw new ConflictError('Ya existe un anuncio con el mismo título y contenido.');
+    }
 
     // Si no se envía valid_from, se asume "ahora"
     const fromDate = valid_from ? new Date(valid_from) : new Date();
