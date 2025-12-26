@@ -4,7 +4,7 @@ const create = async (req, res, next) => {
     try {
         const { id: userId } = req.user;
         const announcement = await announcementService.createAnnouncement(userId, req.body);
-        res.status(201).json({ ok: true, msg: 'Anuncio creado exitosamente.', announcement });
+        res.status(201).json({ ok: true, announcement });
     } catch (error) {
         next(error);
     }
@@ -28,12 +28,34 @@ const getAll = async (req, res, next) => {
     }
 };
 
+const getById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const announcement = await announcementService.getAnnouncementById(id);
+        res.status(200).json({ ok: true, announcement });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const update = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { id: userId, role: userRole } = req.user;
+        // El servicio se encarga de verificar si existe y si el usuario tiene permisos
+        const announcement = await announcementService.updateAnnouncement(id, userId, userRole, req.body);
+        res.status(200).json({ ok: true, announcement });
+    } catch (error) {
+        next(error);
+    }
+};
+
 const remove = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { id: userId, role } = req.user;
-        await announcementService.deleteAnnouncement(id, userId, role);
-        res.status(200).json({ ok: true, msg: 'Anuncio eliminado.' });
+        const { id: userId, role: userRole } = req.user;
+        await announcementService.deleteAnnouncement(id, userId, userRole);
+        res.status(200).json({ ok: true, msg: 'Anuncio eliminado' });
     } catch (error) {
         next(error);
     }
@@ -43,5 +65,7 @@ module.exports = {
     create,
     getActive,
     getAll,
+    getById,
+    update,
     remove
 };

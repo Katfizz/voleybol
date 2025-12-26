@@ -249,7 +249,20 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
     }
     ```
 
-### 3. Crear un Evento
+### 3. Obtener Anuncio por ID
+
+*   **Endpoint**: `GET /:id`
+*   **Descripción**: Obtiene los detalles de un anuncio específico.
+*   **Acceso**: Cualquier usuario autenticado.
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "announcement": { ... }
+    }
+    ```
+
+### 4. Crear un Anuncio
 
 *   **Endpoint**: `POST /`
 *   **Descripción**: Crea un nuevo evento, que puede ser de tipo `PRACTICE` (práctica) o `MATCH` (jornada de partidos).
@@ -529,7 +542,29 @@ Todas las rutas, excepto `/api/auth/login`, requieren un token de autenticación
     }
     ```
 
-### 4. Eliminar un Anuncio
+### 5. Actualizar un Anuncio
+
+*   **Endpoint**: `PUT /:id`
+*   **Descripción**: Actualiza un anuncio existente.
+    *   `ADMIN`: Puede editar cualquier anuncio.
+    *   `COACH`: Solo puede editar sus propios anuncios.
+*   **Acceso**: `ADMIN`, `COACH`.
+*   **Body (Request)**:
+    ```json
+    {
+      "title": "Título actualizado",
+      "valid_until": null // Para hacer indefinido
+    }
+    ```
+*   **Respuesta (Success 200)**:
+    ```json
+    {
+        "ok": true,
+        "announcement": { ... }
+    }
+    ```
+
+### 6. Eliminar un Anuncio
 
 *   **Endpoint**: `DELETE /:id`
 *   **Descripción**: Elimina un anuncio.

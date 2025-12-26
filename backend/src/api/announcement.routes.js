@@ -1,30 +1,33 @@
 const { Router } = require('express');
-const { validateJWT, hasRole, validateCreateAnnouncement, validateAnnouncementId } = require('../middlewares');
-const { create, getActive, getAll, remove } = require('../controllers/announcement.controller');
+const { validateJWT, hasRole, validateCreateAnnouncement, validateAnnouncementId, validateUpdateAnnouncement } = require('../middlewares');
+const { create, getActive, getAll, getById, update, remove } = require('../controllers/announcement.controller');
 
 const router = Router();
 
-// Obtener anuncios activos (visible para todos los usuarios autenticados)
+// Públicos (Autenticados)
 router.get('/', validateJWT, getActive);
 
-// Obtener todos los anuncios (historial completo, solo ADMIN)
-router.get('/all', [
-    validateJWT,
-    hasRole('ADMIN')
-], getAll);
+// Admin (Historial completo)
+router.get('/all', [validateJWT, hasRole('ADMIN')], getAll);
 
-// Crear un anuncio (ADMIN y COACH)
+// Obtener por ID (Cualquiera autenticado)
+router.get('/:id', [validateJWT, validateAnnouncementId], getById);
+
+// Crear (Admin, Coach)
 router.post('/', [
     validateJWT,
     hasRole('ADMIN', 'COACH'),
     validateCreateAnnouncement
 ], create);
 
-// Eliminar un anuncio (ADMIN y COACH - validación de autoría en servicio)
-router.delete('/:id', [
+// Actualizar (Admin, Coach)
+router.put('/:id', [
     validateJWT,
     hasRole('ADMIN', 'COACH'),
-    validateAnnouncementId
-], remove);
+    validateUpdateAnnouncement
+], update);
+
+// Eliminar (Admin, Coach)
+router.delete('/:id', [validateJWT, hasRole('ADMIN', 'COACH'), validateAnnouncementId], remove);
 
 module.exports = router;
