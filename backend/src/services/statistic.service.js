@@ -141,8 +141,12 @@ const updateStatistic = async (id, data, userId) => {
  */
 const deleteStatistic = async (id) => {
     const statId = parseInt(id, 10);
-    // Prisma lanza error si no existe al usar delete, pero podemos verificar antes si queremos un mensaje personalizado
-    // O dejar que Prisma maneje la excepción P2025 (Record not found)
+    
+    const existingStat = await prisma.statistic.findUnique({ where: { id: statId } });
+    if (!existingStat) {
+        throw new NotFoundError(`Estadística con ID ${statId} no encontrada.`);
+    }
+
     return prisma.statistic.delete({ where: { id: statId } });
 };
 
