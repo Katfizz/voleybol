@@ -23,6 +23,7 @@ model User {
   // Relación muchos a muchos: Un coach puede gestionar varias categorías
   managedCategories Category[] @relation("CoachToCategory")
   recordedAttendances Attendance[] @relation("RecordedBy")
+  updatedStatistics Statistic[] @relation("StatUpdatedBy")
 
   @@map("users")
 }
@@ -100,7 +101,7 @@ model Attendance {
 model Statistic {
   id                Int           @id @default(autoincrement())
   player_profile_id Int
-  player_profile    PlayerProfile @relation(fields: [player_profile_id], references: [id])
+  player_profile    PlayerProfile @relation(fields: [player_profile_id], references: [id], onDelete: Cascade)
   match_id          Int
   match             Match         @relation(fields: [match_id], references: [id], onDelete: Cascade)
 
@@ -111,6 +112,9 @@ model Statistic {
   blocks  Int @default(0)
   assists Int @default(0)
   digs    Int @default(0)
+
+  last_updated_by_id Int?
+  last_updated_by    User? @relation("StatUpdatedBy", fields: [last_updated_by_id], references: [id])
 
   @@unique([player_profile_id, match_id])
   @@map("player_stats")
