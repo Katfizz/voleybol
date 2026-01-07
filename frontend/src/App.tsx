@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
+import RegisterUserPage from './pages/RegisterUserPage';
+import HomePage from './pages/HomePage';
 
 function App() {
     return (
@@ -15,9 +17,10 @@ function App() {
                     {/* Rutas protegidas: Requieren autenticación */}
                     <Route element={<ProtectedRoute />}>
                         <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/register-user" element={<RegisterUserPage />} />
                         
-                        {/* Por ahora, redirigimos la raíz al perfil */}
-                        <Route path="/" element={<Navigate to="/profile" replace />} />
+                        {/* Landing Page de desarrollo */}
+                        <Route path="/" element={<HomePage />} />
                     </Route>
 
                     {/* Cualquier ruta desconocida redirige al inicio */}
