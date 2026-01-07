@@ -1,4 +1,4 @@
-import { Match } from './match.types';
+import { type Match } from './match.types';
 
 export type EventType = 'MATCH' | 'PRACTICE';
 

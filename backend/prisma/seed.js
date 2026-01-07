@@ -12,32 +12,22 @@ async function main() {
   const salt = bcrypt.genSaltSync();
   const hashedPassword = bcrypt.hashSync(adminPassword, salt);
 
-  // ÚLTIMO RECURSO: Usar SQL crudo para evitar el bug del motor de Prisma.
   try {
-    // Usamos $executeRawUnsafe porque $executeRaw no soporta ENUMs directamente como parámetros.
-    // Es seguro en este contexto porque los valores no vienen del usuario.
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO "public"."users" ("email", "password_hash", "role") VALUES ($1, $2, CAST($3 AS "public"."Role"))`,
-      adminEmail,
-      hashedPassword,
-      Role.ADMIN
-    );
-    console.log(
-      `Usuario administrador '${adminEmail}' creado exitosamente con SQL crudo.`
-    );
+    // Usamos upsert: Si existe (where email), no hace nada (update {}). Si no, lo crea.
+    // Esto evita errores de nombres de tablas y maneja la concurrencia correctamente.
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {}, 
+      create: {
+        email: adminEmail,
+        password_hash: hashedPassword,
+        role: Role.ADMIN,
+      },
+    });
+    console.log(`Usuario administrador '${adminEmail}' procesado correctamente.`);
   } catch (error) {
-    // El código de error para violación de unicidad en PostgreSQL es '23505'
-    if (
-      error.code === "P2002" ||
-      error.code === "P2010" ||
-      (error.nativeError && error.nativeError.code === "23505")
-    ) {
-      console.log(
-        `Usuario administrador '${adminEmail}' ya existe. No se realizaron cambios.`
-      );
-    } else {
-      throw error; // Si es otro error, lo lanzamos para no ocultar problemas reales.
-    }
+    console.error("Error crítico en el seed:", error);
+    throw error;
   }
   console.log("Proceso de seed finalizado.");
 }
