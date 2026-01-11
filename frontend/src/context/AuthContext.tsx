@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
             const response = await authService.login(email, password);
             if (response.ok && response.user) {
+                localStorage.setItem('token', response.token);
                 setUser(response.user);
             }
         } catch (error) {

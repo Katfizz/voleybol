@@ -28,8 +28,8 @@ const createUser = async (userData, requestingUser) => {
             if (!profile) {
                 throw new AppError('El perfil es requerido para el rol de jugador', 400);
             }
-            
-            const { full_name, birthDate, contact_data, representative_data } = profile;
+
+            const { full_name, birthDate, position, contact_data, representative_data } = profile;
             await tx.playerProfile.create({
                 data: {
                     user: {
@@ -37,6 +37,7 @@ const createUser = async (userData, requestingUser) => {
                     },
                     full_name: full_name,
                     birth_date: birthDate ? new Date(birthDate) : undefined,
+                    position: position,
                     contact_data: contact_data || undefined, // Guardar el objeto JSON directamente
                     representative_data: representative_data || undefined // Guardar el objeto JSON directamente
                 }

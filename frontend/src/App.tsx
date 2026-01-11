@@ -4,7 +4,9 @@ import { ProtectedRoute } from './routes/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterUserPage from './pages/RegisterUserPage';
+import UsersPage from './pages/UsersPage';
 import HomePage from './pages/HomePage';
+import { Layout } from './components/Layout';
 
 function App() {
     return (
@@ -16,11 +18,15 @@ function App() {
 
                     {/* Rutas protegidas: Requieren autenticación */}
                     <Route element={<ProtectedRoute />}>
-                        <Route path="/profile" element={<ProfilePage />} />
-                        <Route path="/register-user" element={<RegisterUserPage />} />
-                        
-                        {/* Landing Page de desarrollo */}
-                        <Route path="/" element={<HomePage />} />
+                        {/* El Layout agrega el Navbar a todas estas rutas */}
+                        <Route element={<Layout />}>
+                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/register-user" element={<RegisterUserPage />} />
+                            <Route path="/users" element={<UsersPage />} />
+                            
+                            {/* Landing Page de desarrollo */}
+                            <Route path="/" element={<HomePage />} />
+                        </Route>
                     </Route>
 
                     {/* Cualquier ruta desconocida redirige al inicio */}

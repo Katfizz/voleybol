@@ -7,6 +7,12 @@ export interface LoginResponse {
     token: string;
 }
 
+export interface RepresentativeData {
+    full_name: string;
+    phone: string;
+    relationship: string;
+}
+
 export interface RegisterUserDTO {
     email: string;
     password: string;
@@ -17,4 +23,5 @@ export interface RegisterUserDTO {
     birth_date?: string;
     phone?: string;
     address?: string;
+    representative_data?: RepresentativeData;
 }

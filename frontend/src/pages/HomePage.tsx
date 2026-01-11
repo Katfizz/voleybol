@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useEffect } from 'react';
 
 export default function HomePage() {
     const { user } = useAuth();
+    useEffect(() => {
+        document.title = 'Panel de Desarrollo';
+    }, []);
 
     return (
         <div style={{ padding: '2rem' }}>
@@ -14,7 +18,7 @@ export default function HomePage() {
                 <Link to="/profile" style={linkStyle}>👤 Mi Perfil</Link>
                 
                 {(user?.role === 'ADMIN' || user?.role === 'COACH') && (
-                    <Link to="/register-user" style={linkStyle}>➕ Registrar Nuevo Usuario</Link>
+                    <Link to="/users" style={linkStyle}>👥 Gestionar Usuarios</Link>
                 )}
             </nav>
         </div>

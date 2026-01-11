@@ -17,7 +17,12 @@ export default function RegisterUserPage() {
         position: '',
         birth_date: '',
         phone: '',
-        address: ''
+        address: '',
+        representative_data: {
+            full_name: '',
+            phone: '',
+            relationship: ''
+        }
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -27,20 +32,58 @@ export default function RegisterUserPage() {
         ? ['ADMIN', 'COACH', 'PLAYER'] 
         : ['PLAYER']; // COACH solo puede crear PLAYER
 
+    // Calcular si es menor de edad (menor de 18 años)
+    const isMinor = () => {
+        if (!formData.birth_date) return false;
+        const today = new Date();
+        const birthDate = new Date(formData.birth_date);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age < 18;
+    };
+
+    const showRepresentativeData = formData.role === 'PLAYER' && isMinor();
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
         try {
-            await userService.createUser(formData);
+            // Preparamos los datos. Si no es menor, eliminamos representative_data para no enviarlo vacío
+            const dataToSend = { ...formData };
+            if (!showRepresentativeData) {
+                delete dataToSend.representative_data;
+            }
+
+            await userService.createUser(dataToSend);
             setSuccess(`Usuario ${formData.email} creado exitosamente.`);
             // Limpiar formulario
-            setFormData({ email: '', password: '', role: 'PLAYER', full_name: '', position: '', birth_date: '', phone: '', address: '' });
+            setFormData({ 
+                email: '', password: '', role: 'PLAYER', 
+                full_name: '', position: '', birth_date: '', phone: '', address: '',
+                representative_data: {
+                    full_name: '', phone: '', relationship: ''
+                }
+            });
         } catch (err) {
             const axiosError = err as AxiosError<{ msg: string }>;
             setError(axiosError.response?.data?.msg || 'Error al registrar usuario');
         }
+    };
+
+    // Helper para actualizar los datos anidados del representante
+    const updateRepresentative = (field: string, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            representative_data: {
+                ...prev.representative_data!,
+                [field]: value
+            }
+        }));
     };
 
     return (
@@ -129,6 +172,50 @@ export default function RegisterUserPage() {
                                 style={{ width: '100%', padding: '8px' }}
                             />
                         </div>
+
+                        {/* Campos del Representante (Solo si es menor de edad) */}
+                        {showRepresentativeData && (
+                            <div style={{ backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '8px', marginBottom: '1rem', border: '1px dashed #ccc' }}>
+                                <h4 style={{ marginTop: 0, color: '#d63384', fontSize: '0.95rem' }}>
+                                    ⚠️ El jugador es menor de edad. Datos del Representante requeridos:
+                                </h4>
+                                
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Nombre del Representante: <span style={{color: 'red'}}>*</span></label>
+                                    <input
+                                        type="text"
+                                        value={formData.representative_data?.full_name || ''}
+                                        onChange={(e) => updateRepresentative('full_name', e.target.value)}
+                                        required={showRepresentativeData}
+                                        style={{ width: '100%', padding: '8px' }}
+                                    />
+                                </div>
+                                
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <div style={{ marginBottom: '1rem', flex: 1 }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Teléfono: <span style={{color: 'red'}}>*</span></label>
+                                        <input
+                                            type="tel"
+                                            value={formData.representative_data?.phone || ''}
+                                            onChange={(e) => updateRepresentative('phone', e.target.value)}
+                                            required={showRepresentativeData}
+                                            style={{ width: '100%', padding: '8px' }}
+                                        />
+                                    </div>
+                                    <div style={{ marginBottom: '1rem', flex: 1 }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Parentesco: <span style={{color: 'red'}}>*</span></label>
+                                        <input
+                                            type="text"
+                                            value={formData.representative_data?.relationship || ''}
+                                            onChange={(e) => updateRepresentative('relationship', e.target.value)}
+                                            required={showRepresentativeData}
+                                            style={{ width: '100%', padding: '8px' }}
+                                            placeholder="Padre, Madre..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', marginTop: '1.5rem' }}>Datos de Contacto</h3>
                         
