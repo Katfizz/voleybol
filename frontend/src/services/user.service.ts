@@ -36,5 +36,41 @@ export const userService = {
 
     deleteUser: async (id: number): Promise<void> => {
         await api.delete(`/users/${id}`);
+    },
+
+    getUser: async (id: number): Promise<User> => {
+        const { data } = await api.get<{ ok: boolean, user: User }>(`/users/${id}`);
+        return data.user;
+    },
+
+    updateUser: async (id: number, userData: Partial<RegisterUserDTO>): Promise<User> => {
+        let payload: any = { ...userData };
+
+        // Estructura para PLAYER (similar a createUser)
+        if (userData.role === 'PLAYER') {
+            // El backend espera firstName y lastName separados para actualizar el perfil
+            const nameParts = (userData.full_name || '').trim().split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ');
+
+            payload = {
+                email: userData.email,
+                password: userData.password, // Puede ir vacío si no se cambia
+                role: userData.role,
+                profile: {
+                    firstName,
+                    lastName,
+                    position: userData.position,
+                    birthDate: userData.birth_date,
+                    contact: { // El backend espera 'contact'
+                        phone: userData.phone,
+                        address: userData.address
+                    },
+                    representativeData: userData.representative_data // El backend espera camelCase
+                }
+            };
+        }
+        const { data } = await api.put<{ ok: boolean, user: User }>(`/users/${id}`, payload);
+        return data.user;
     }
 };

@@ -96,6 +96,19 @@ export default function UsersPage() {
                             <td style={tdStyle}>{user.profile?.position || <span style={{ color: '#999' }}>-</span>}</td>
                             <td style={tdStyle}>
                                 <button
+                                    onClick={() => navigate(`/users/${user.id}/edit`)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        backgroundColor: '#ffc107',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        marginRight: '5px'
+                                    }}
+                                >
+                                    Editar
+                                </button>
+                                <button
                                     onClick={() => handleDelete(user.id)}
                                     disabled={currentUser?.id === user.id} // Evita eliminarse a sí mismo
                                     style={{

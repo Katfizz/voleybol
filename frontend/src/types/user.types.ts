@@ -6,6 +6,8 @@ export interface UserProfile {
     position?: string;
     birth_date?: string;
     categories?: { id: number; name: string }[];
+    contact_data?: { phone?: string; address?: string };
+    representative_data?: { full_name: string; phone: string; relationship: string };
 }
 
 export interface User {
