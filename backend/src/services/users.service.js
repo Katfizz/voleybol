@@ -67,6 +67,7 @@ const createUser = async (userData, requestingUser) => {
                     position: true,
                     contact_data: true,
                     representative_data: true,
+                    categories: { select: { id: true, name: true } },
                 },
             },
         },
@@ -90,7 +91,8 @@ const getAllUsers = async () => {
                     birth_date: true,
                     position: true,
                     contact_data: true,
-                    representative_data: true
+                    representative_data: true,
+                    categories: { select: { id: true, name: true } },
                 }
             }
         }
@@ -119,6 +121,7 @@ const getUserById = async (id) => {
                     position: true,
                     contact_data: true,
                     representative_data: true,
+                    categories: { select: { id: true, name: true } }
                 }
             }
         }

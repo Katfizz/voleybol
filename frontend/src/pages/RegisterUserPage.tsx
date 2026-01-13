@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { userService } from '../services/user.service';
 import { useAuth } from '../context/AuthContext';
@@ -7,7 +7,7 @@ import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function RegisterUserPage() {
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, isLoading } = useAuth();
     const navigate = useNavigate();
     
     const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<RegisterUserDTO>({
@@ -22,6 +22,13 @@ export default function RegisterUserPage() {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    // Protección de ruta: Solo ADMIN y COACH pueden acceder
+    useEffect(() => {
+        if (!isLoading && currentUser && !['ADMIN', 'COACH'].includes(currentUser.role)) {
+            navigate('/');
+        }
+    }, [currentUser, isLoading, navigate]);
 
     // Determinar qué roles puede crear el usuario actual
     const availableRoles: Role[] = currentUser?.role === 'ADMIN' 
@@ -66,6 +73,8 @@ export default function RegisterUserPage() {
             setError(axiosError.response?.data?.msg || 'Error al registrar usuario');
         }
     };
+
+    if (isLoading) return <div>Cargando...</div>;
 
     return (
         <div style={{ padding: '2rem', maxWidth: '500px', margin: '0 auto' }}>

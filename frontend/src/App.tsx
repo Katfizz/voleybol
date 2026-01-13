@@ -6,6 +6,7 @@ import ProfilePage from './pages/ProfilePage';
 import RegisterUserPage from './pages/RegisterUserPage';
 import UsersPage from './pages/UsersPage';
 import HomePage from './pages/HomePage';
+import CategoriesPage from './pages/CategoriesPage';
 import { Layout } from './components/Layout';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
                             <Route path="/profile" element={<ProfilePage />} />
                             <Route path="/register-user" element={<RegisterUserPage />} />
                             <Route path="/users" element={<UsersPage />} />
+                            <Route path="/categories" element={<CategoriesPage />} />
                             
                             {/* Landing Page de desarrollo */}
                             <Route path="/" element={<HomePage />} />

@@ -41,7 +41,7 @@ export const authService = {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
 
-            const { exp } = JSON.parse(jsonPayload);
+            const { exp, role, uid, email } = JSON.parse(jsonPayload);
 
             // Verificar si el token ha expirado (exp está en segundos, Date.now() en ms)
             if (exp && Date.now() >= exp * 1000) {
@@ -51,7 +51,13 @@ export const authService = {
                 return null;
             }
 
-            return JSON.parse(userStr) as User;
+            // Construimos el usuario. Si existe en localStorage lo usamos (para mantener profile data),
+            // pero forzamos el rol y datos críticos desde el token.
+            const user = userStr ? JSON.parse(userStr) : { id: uid, email };
+            if (role) user.role = role;
+            if (uid) user.id = uid;
+
+            return user as User;
         } catch (error) {
             console.error("Error al validar la sesión:", error);
             // Si falla la decodificación (por ejemplo, token opaco o formato extraño),

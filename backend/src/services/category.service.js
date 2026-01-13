@@ -125,6 +125,17 @@ const getAllCategories = async () => {
             _count: { // Contar cuántos jugadores y coaches hay en cada categoría
                 select: { playerProfiles: true, coaches: true },
             },
+            playerProfiles: {
+                select: {
+                    id: true,
+                    full_name: true,
+                    position: true,
+                    user: { select: { id: true, email: true } }
+                }
+            },
+            coaches: {
+                select: { id: true, email: true, role: true }
+            }
         },
     });
 };

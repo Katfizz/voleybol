@@ -16,6 +16,7 @@ export default function HomePage() {
             
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '300px', marginTop: '20px' }}>
                 <Link to="/profile" style={linkStyle}>👤 Mi Perfil</Link>
+                <Link to="/categories" style={linkStyle}>🏆 Categorías</Link>
                 
                 {(user?.role === 'ADMIN' || user?.role === 'COACH') && (
                     <Link to="/users" style={linkStyle}>👥 Gestionar Usuarios</Link>

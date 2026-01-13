@@ -1,14 +1,22 @@
 import { useEffect, useState } from 'react';
 import { userService } from '../services/user.service';
 import { type User } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function UsersPage() {
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, isLoading: authLoading } = useAuth();
+    const navigate = useNavigate();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Protección de ruta: Solo ADMIN y COACH pueden acceder
+    useEffect(() => {
+        if (!authLoading && currentUser && !['ADMIN', 'COACH'].includes(currentUser.role)) {
+            navigate('/');
+        }
+    }, [currentUser, authLoading, navigate]);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -38,6 +46,7 @@ export default function UsersPage() {
         }
     };
 
+    if (authLoading) return <div>Verificando permisos...</div>;
     if (loading) return <div style={{ padding: '20px' }}>Cargando usuarios...</div>;
     if (error) return <div style={{ padding: '20px', color: 'red' }}>{error}</div>;
 

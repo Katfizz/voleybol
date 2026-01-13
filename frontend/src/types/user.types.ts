@@ -5,6 +5,7 @@ export interface UserProfile {
     full_name: string;
     position?: string;
     birth_date?: string;
+    categories?: { id: number; name: string }[];
 }
 
 export interface User {

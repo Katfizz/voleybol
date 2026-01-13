@@ -21,6 +21,7 @@ export const Navbar = () => {
                 
                 <div style={{ display: 'flex', gap: '15px', marginLeft: '20px' }}>
                     <Link to="/profile" style={{ color: '#adb5bd', textDecoration: 'none' }}>Mi Perfil</Link>
+                    <Link to="/categories" style={{ color: '#adb5bd', textDecoration: 'none' }}>Categorías</Link>
                     
                     {(user?.role === 'ADMIN' || user?.role === 'COACH') && (
                         <Link to="/register-user" style={{ color: '#adb5bd', textDecoration: 'none' }}>Usuarios</Link>
