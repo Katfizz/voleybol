@@ -89,7 +89,7 @@ export default function EditUserPage() {
         setError('');
         setSuccess('');
         try {
-            const dataToSend = { ...data };
+            const dataToSend: any = { ...data };
             if (!showRepresentativeData) delete dataToSend.representative_data;
             if (!dataToSend.password)  delete dataToSend.password; // No enviar si está vacía
 

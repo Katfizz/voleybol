@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage';
 import CategoriesPage from './pages/CategoriesPage';
 import EditUserPage from './pages/EditUserPage';
 import { Layout } from './components/Layout';
+import { Toaster } from 'sonner';
 
 function App() {
     return (
@@ -36,6 +37,7 @@ function App() {
                     {/* Cualquier ruta desconocida redirige al inicio */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
+                <Toaster />
             </AuthProvider>
         </BrowserRouter>
     );
