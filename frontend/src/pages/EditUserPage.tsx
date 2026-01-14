@@ -91,7 +91,7 @@ export default function EditUserPage() {
         try {
             const dataToSend = { ...data };
             if (!showRepresentativeData) delete dataToSend.representative_data;
-            if (!dataToSend.password) delete dataToSend.password; // No enviar si está vacía
+            if (!dataToSend.password)  delete dataToSend.password; // No enviar si está vacía
 
             if (id) {
                 await userService.updateUser(parseInt(id), dataToSend);
