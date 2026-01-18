@@ -7,6 +7,10 @@ import RegisterUserPage from './pages/RegisterUserPage';
 import UsersPage from './pages/UsersPage';
 import HomePage from './pages/HomePage';
 import CategoriesPage from './pages/CategoriesPage';
+import EventsPage from './pages/EventsPage';
+import CreateEventPage from './pages/CreateEventPage';
+import EditEventPage from './pages/EditEventPage';
+import EventDetailsPage from './pages/EventDetailsPage';
 import EditUserPage from './pages/EditUserPage';
 import { Layout } from './components/Layout';
 import { Toaster } from 'sonner';
@@ -28,6 +32,10 @@ function App() {
                             <Route path="/users" element={<UsersPage />} />
                             <Route path="/users/:id/edit" element={<EditUserPage />} />
                             <Route path="/categories" element={<CategoriesPage />} />
+                            <Route path="/events" element={<EventsPage />} />
+                            <Route path="/events/new" element={<CreateEventPage />} />
+                            <Route path="/events/:id" element={<EventDetailsPage />} />
+                            <Route path="/events/:id/edit" element={<EditEventPage />} />
                             
                             {/* Landing Page de desarrollo */}
                             <Route path="/" element={<HomePage />} />

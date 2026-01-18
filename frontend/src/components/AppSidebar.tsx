@@ -1,4 +1,4 @@
-import { Home, User, Users, Trophy, LogOut } from "lucide-react"
+import { Home, User, Users, Trophy, LogOut, CalendarDays } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +21,7 @@ export function AppSidebar() {
         { title: "Inicio", url: "/", icon: Home },
         { title: "Perfil", url: "/profile", icon: User },
         { title: "Categorías", url: "/categories", icon: Trophy },
+        { title: "Eventos", url: "/events", icon: CalendarDays },
     ]
 
     if (user?.role === 'ADMIN' || user?.role === 'COACH') {

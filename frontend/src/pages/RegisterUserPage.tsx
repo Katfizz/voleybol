@@ -81,4 +81,6 @@ export default function RegisterUserPage() {
                     />
                 </CardContent>
             </Card>
-        </div>); }
+        </div>
+    );
+}
