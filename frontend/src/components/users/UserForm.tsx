@@ -35,7 +35,7 @@ const getUserSchema = (isEditMode: boolean) => z.object({
   email: z.string().email("Email inválido"),
   password: isEditMode 
     ? z.string().optional() 
-    : z.string({ required_error: "La contraseña es requerida" }).min(6, "La contraseña debe tener al menos 6 caracteres"),
+    : z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   role: z.enum(["ADMIN", "COACH", "PLAYER"]),
   full_name: z.string().optional(),
   position: z.string().optional(),
