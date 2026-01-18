@@ -19,7 +19,7 @@ export default function ProfilePage() {
         try {
             const userData = await profileService.getProfile();
             setUser(userData);
-        } catch (err) {
+        } catch {
             toast.error('No se pudo cargar la información del perfil.');
         } finally {
             setLoading(false);

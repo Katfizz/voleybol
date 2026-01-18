@@ -4,7 +4,6 @@ import { Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { userService } from '../services/user.service';
-import { useAuth } from '../context/AuthContext';
 import { type User } from '../types/user.types';
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const { user: currentUser } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,7 +25,7 @@ export default function UsersPage() {
         try {
             const data = await userService.getUsers();
             setUsers(data);
-        } catch (err) {
+        } catch {
             toast.error('Error al cargar usuarios');
         } finally {
             setLoading(false);
@@ -40,7 +38,7 @@ export default function UsersPage() {
             await userService.deleteUser(id);
             setUsers(users.filter(u => u.id !== id));
             toast.success('Usuario eliminado');
-        } catch (err) {
+        } catch {
             toast.error('Error al eliminar usuario');
         }
     };
