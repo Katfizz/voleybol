@@ -1,135 +1,94 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, UserPlus } from "lucide-react";
+import { toast } from "sonner";
+
 import { userService } from '../services/user.service';
-import { type User } from '../types';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { type User } from '../types/user.types';
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { UsersTable } from '../components/users/UsersTable';
 
 export default function UsersPage() {
-    const { user: currentUser, isLoading: authLoading } = useAuth();
-    const navigate = useNavigate();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    // Protección de ruta: Solo ADMIN y COACH pueden acceder
-    useEffect(() => {
-        if (!authLoading && currentUser && !['ADMIN', 'COACH'].includes(currentUser.role)) {
-            navigate('/');
-        }
-    }, [currentUser, authLoading, navigate]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const { user: currentUser } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const loadUsers = async () => {
-            try {
-                const data = await userService.getUsers();
-                setUsers(data);
-            } catch (err) {
-                console.error(err);
-                setError('Error al cargar la lista de usuarios.');
-            } finally {
-                setLoading(false);
-            }
-        };
         loadUsers();
     }, []);
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.')) return;
-
+    const loadUsers = async () => {
         try {
-            await userService.deleteUser(id);
-            // Actualizamos la lista localmente filtrando el usuario eliminado
-            setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+            const data = await userService.getUsers();
+            setUsers(data);
         } catch (err) {
-            console.error("Error eliminando usuario:", err);
-            alert('Error al eliminar el usuario. Verifica que tengas permisos.');
+            toast.error('Error al cargar usuarios');
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (authLoading) return <div>Verificando permisos...</div>;
-    if (loading) return <div style={{ padding: '20px' }}>Cargando usuarios...</div>;
-    if (error) return <div style={{ padding: '20px', color: 'red' }}>{error}</div>;
+    const handleDelete = async (id: number) => {
+        if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+        try {
+            await userService.deleteUser(id);
+            setUsers(users.filter(u => u.id !== id));
+            toast.success('Usuario eliminado');
+        } catch (err) {
+            toast.error('Error al eliminar usuario');
+        }
+    };
+
+    const filteredUsers = useMemo(() => {
+        return users.filter(user => 
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [users, searchTerm]);
+
+    if (loading) return <div className="p-8 text-center">Cargando usuarios...</div>;
 
     return (
-        <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2>Lista de Usuarios</h2>
-                <Link 
-                    to="/register-user" 
-                    style={{ 
-                        padding: '10px 15px', 
-                        backgroundColor: '#007bff', 
-                        color: 'white', 
-                        textDecoration: 'none', 
-                        borderRadius: '4px' 
-                    }}
-                >
-                    + Nuevo Usuario
-                </Link>
+        <div className="p-4 md:p-8 max-w-6xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">Usuarios</h2>
+                    <p className="text-muted-foreground">Gestiona los miembros del club, entrenadores y administradores.</p>
+                </div>
+                <Button onClick={() => navigate('/register-user')} className="bg-primary">
+                    <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
+                </Button>
             </div>
 
-            <table style={{ width: '100%', borderCollapse: 'collapse', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
-                <thead>
-                    <tr style={{ backgroundColor: '#f8f9fa', textAlign: 'left' }}>
-                        <th style={thStyle}>Email</th>
-                        <th style={thStyle}>Rol</th>
-                        <th style={thStyle}>Nombre</th>
-                        <th style={thStyle}>Posición</th>
-                        <th style={thStyle}>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map(user => (
-                        <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
-                            <td style={tdStyle}>{user.email}</td>
-                            <td style={tdStyle}>
-                                <span style={{ 
-                                    padding: '2px 6px', 
-                                    borderRadius: '4px', 
-                                    backgroundColor: user.role === 'ADMIN' ? '#d4edda' : user.role === 'COACH' ? '#fff3cd' : '#e2e3e5',
-                                    fontSize: '0.85em'
-                                }}>
-                                    {user.role}
-                                </span>
-                            </td>
-                            <td style={tdStyle}>{user.profile?.full_name || <span style={{ color: '#999' }}>-</span>}</td>
-                            <td style={tdStyle}>{user.profile?.position || <span style={{ color: '#999' }}>-</span>}</td>
-                            <td style={tdStyle}>
-                                <button
-                                    onClick={() => navigate(`/users/${user.id}/edit`)}
-                                    style={{
-                                        padding: '6px 12px',
-                                        backgroundColor: '#ffc107',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        marginRight: '5px'
-                                    }}
-                                >
-                                    Editar
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(user.id)}
-                                    disabled={currentUser?.id === user.id} // Evita eliminarse a sí mismo
-                                    style={{
-                                        padding: '6px 12px',
-                                        backgroundColor: currentUser?.id === user.id ? '#ccc' : '#dc3545',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: currentUser?.id === user.id ? 'not-allowed' : 'pointer'
-                                    }}
-                                >
-                                    Eliminar
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <Card>
+                <CardHeader className="pb-3">
+                    <CardTitle>Listado de Miembros</CardTitle>
+                    <CardDescription>
+                        Total: {filteredUsers.length} usuarios registrados.
+                    </CardDescription>
+                    <div className="pt-2 w-full md:w-1/3">
+                        <InputGroup>
+                            <InputGroupAddon>
+                                <Search className="h-4 w-4" />
+                            </InputGroupAddon>
+                            <InputGroupInput 
+                                placeholder="Buscar por nombre o email..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </InputGroup>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <UsersTable users={filteredUsers} onDelete={handleDelete} />
+                </CardContent>
+            </Card>
         </div>
     );
 }
-
-const thStyle = { padding: '12px 15px', borderBottom: '2px solid #dee2e6' };
-const tdStyle = { padding: '10px 15px' };
