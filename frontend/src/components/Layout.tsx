@@ -1,14 +1,17 @@
-import { Outlet } from 'react-router-dom';
-import { Navbar } from './Navbar';
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
+import { Outlet } from "react-router-dom"
 
-export const Layout = () => {
-    return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <Navbar />
-            <main style={{ flex: 1, padding: '20px' }}>
-                {/* Aquí se renderizará la página actual (Profile, Home, etc.) */}
-                <Outlet />
-            </main>
+export function Layout() {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main className="w-full">
+        <div className="p-2">
+            <SidebarTrigger />
         </div>
-    );
-};
+        <Outlet />
+      </main>
+    </SidebarProvider>
+  )
+}
