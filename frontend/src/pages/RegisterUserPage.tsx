@@ -25,7 +25,7 @@ export default function RegisterUserPage() {
 
     const onSubmit = async (data: UserFormValues) => {
         try {
-            const dataToSend: any = { ...data };
+            const dataToSend: Record<string, unknown> = { ...data };
             
             // Formatear fecha para el backend (YYYY-MM-DD)
             if (data.birth_date) {
@@ -50,7 +50,7 @@ export default function RegisterUserPage() {
                 }
             }
 
-            await userService.createUser(dataToSend);
+            await userService.createUser(dataToSend as any);
             toast.success(`Usuario ${data.email} creado exitosamente.`);
             setFormKey(prev => prev + 1); // Reiniciar formulario
             window.scrollTo(0, 0);

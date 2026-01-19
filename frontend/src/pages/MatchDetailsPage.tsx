@@ -8,7 +8,7 @@ import { eventService } from '../services/event.service';
 import { statisticService } from '../services/statistic.service';
 import { useAuth } from '../context/AuthContext';
 import { type Match } from '../types/match.types';
-import { type Statistic } from '../types/statistic.types';
+import { type Statistic, type CreateStatisticDTO } from '../types/statistic.types';
 import { type User } from '../types/user.types';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -70,7 +70,7 @@ export default function MatchDetailsPage() {
         }
     }, [id, loadData]);
 
-    const handleSaveStats = async (data: any) => {
+    const handleSaveStats = async (data: CreateStatisticDTO) => {
         if (!match) return;
         try {
             await statisticService.record(match.id, data);
@@ -131,7 +131,7 @@ export default function MatchDetailsPage() {
                 </CardHeader>
                 <CardContent className="pt-8">
                     <h3 className="text-lg font-semibold mb-4 text-center">Detalle de Sets</h3>
-                    <div className="space-y-2 max-w-md mx-auto">
+                    <div className="space-y-2 max-w-md mx-auto max-h-[300px] overflow-y-auto pr-2">
                         {match.sets && match.sets.length > 0 ? (
                             match.sets.map((set) => (
                                 <div key={set.id} className="flex justify-between items-center p-3 rounded-lg bg-muted/30 border">

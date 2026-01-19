@@ -11,5 +11,9 @@ export const attendanceService = {
     record: async (eventId: number, data: CreateAttendanceDTO) => {
         const response = await api.post<{ ok: boolean; msg: string }>(`/attendance/event/${eventId}`, data);
         return response.data;
+    },
+    delete: async (id: number) => {
+        const response = await api.delete<{ ok: boolean; msg: string }>(`/attendance/${id}`);
+        return response.data;
     }
 };

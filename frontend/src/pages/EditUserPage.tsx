@@ -32,7 +32,7 @@ export default function EditUserPage() {
                     const user = await userService.getUser(parseInt(id));
                     
                     // Mapear datos del usuario al formulario
-                    const formData: any = {
+                    const formData: Partial<UserFormValues> = {
                         email: user.email,
                         role: user.role,
                         password: '', // Contraseña vacía por defecto (no cambiar)
@@ -65,7 +65,7 @@ export default function EditUserPage() {
 
     const onSubmit = async (data: UserFormValues) => {
         try {
-            const dataToSend: any = { ...data };
+            const dataToSend: Record<string, unknown> = { ...data };
             
             // Formatear fecha para el backend
             if (data.birth_date) {
@@ -75,7 +75,7 @@ export default function EditUserPage() {
             if (!dataToSend.password)  delete dataToSend.password; // No enviar si está vacía
 
             if (id) {
-                await userService.updateUser(parseInt(id), dataToSend);
+                await userService.updateUser(parseInt(id), dataToSend as any);
                 toast.success('Usuario actualizado exitosamente.');
                 setTimeout(() => navigate('/users'), 1500);
             }

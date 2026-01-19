@@ -19,6 +19,10 @@ export interface Match {
     homeCategory?: Category;
     awayCategory?: Category;
     winnerCategory?: Category;
+    event?: {
+        name: string;
+        date_time: string;
+    };
     sets?: Set[];
 }
 

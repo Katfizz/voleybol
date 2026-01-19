@@ -11,6 +11,9 @@ export interface Attendance {
         full_name: string;
         position: string;
     };
+    recorded_by?: {
+        email: string;
+    };
 }
 
 export interface CreateAttendanceDTO {
