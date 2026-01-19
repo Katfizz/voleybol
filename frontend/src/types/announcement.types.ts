@@ -2,13 +2,20 @@ export interface Announcement {
     id: number;
     title: string;
     content: string;
-    createdAt: string;
-    expiresAt?: string; // Opcional, para la lógica de anuncios activos
-    isActive?: boolean;
+    valid_from: string;
+    valid_until?: string | null;
+    created_at: string;
+    author_id: number;
+    author?: {
+        email: string;
+        profile?: {
+            full_name: string;
+        }
+    };
 }
 
 export interface CreateAnnouncementDTO {
     title: string;
     content: string;
-    expiresAt?: string;
+    valid_until?: string | null;
 }

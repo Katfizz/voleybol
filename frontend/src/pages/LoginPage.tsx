@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Button } from "@/components/ui/button";
 import {
@@ -33,9 +34,10 @@ export default function LoginPage() {
         try {
             await login(data.email, data.password);
             navigate('/');
-        } catch (err: any) {
+        } catch (err) {
+            const axiosError = err as AxiosError<{ msg: string }>;
             // Si el backend devuelve un mensaje de error, lo mostramos
-            setError(err.response?.data?.msg || 'Error al iniciar sesión. Verifica tus credenciales.');
+            setError(axiosError.response?.data?.msg || 'Error al iniciar sesión. Verifica tus credenciales.');
         } finally {
             setLoading(false);
         }

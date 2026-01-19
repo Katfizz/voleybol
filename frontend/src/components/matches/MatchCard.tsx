@@ -22,11 +22,11 @@ export function MatchCard({ match, isAdminOrCoach, onDelete, onEdit }: MatchCard
     return (
         <Card className="relative overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/matches/${match.id}`)}>
              {isAdminOrCoach && (
-                <div className="absolute top-2 right-2 flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary" onClick={() => onEdit?.(match)}>
+                <div className="absolute top-2 right-2 flex gap-1 z-10">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary" onClick={(e) => { e.stopPropagation(); onEdit?.(match); }}>
                         <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={() => onDelete?.(match.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={(e) => { e.stopPropagation(); onDelete?.(match.id); }}>
                         <Trash2 className="h-4 w-4" />
                     </Button>
                 </div>

@@ -1,5 +1,5 @@
 import api from '../api/axios';
-import { type User } from '../types';
+import { type User, type RegisterUserDTO } from '../types';
 
 export const profileService = {
     getProfile: async (): Promise<User> => {
@@ -7,7 +7,7 @@ export const profileService = {
         return data.profile;
     },
 
-    updateProfile: async (profileData: any) => {
+    updateProfile: async (profileData: Partial<RegisterUserDTO>) => {
         const { data } = await api.put<{ ok: boolean, profile: User }>('/profile', profileData);
         return data.profile;
     }

@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
 import { useAuth } from "@/context/AuthContext"
 import { authService } from "@/services/auth.service"
+import { Footer } from "@/components/Footer"
 
 export function Layout() {
   const location = useLocation()
@@ -24,11 +25,14 @@ export function Layout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="w-full">
+      <main className="w-full flex flex-col min-h-screen">
         <div className="p-2">
             <SidebarTrigger />
         </div>
-        <Outlet />
+        <div className="flex-1">
+            <Outlet />
+        </div>
+        <Footer />
       </main>
     </SidebarProvider>
   )

@@ -30,6 +30,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+const RELATIONSHIPS = [
+    { value: "FATHER", label: "Padre" },
+    { value: "MOTHER", label: "Madre" },
+    { value: "GRANDFATHER", label: "Abuelo" },
+    { value: "GRANDMOTHER", label: "Abuela" },
+    { value: "UNCLE", label: "Tío" },
+    { value: "AUNT", label: "Tía" },
+    { value: "BROTHER", label: "Hermano" },
+    { value: "SISTER", label: "Hermana" },
+    { value: "GUARDIAN", label: "Tutor Legal" },
+    { value: "OTHER", label: "Otro" },
+];
+
 // Esquema dinámico según el modo (edición o creación)
 const getUserSchema = (isEditMode: boolean) => z.object({
   email: z.string().email("Email inválido"),
@@ -370,9 +383,20 @@ export function UserForm({
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Parentesco</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Padre, Madre..." {...field} />
-                                                    </FormControl>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Seleccione parentesco" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {RELATIONSHIPS.map((rel) => (
+                                                                <SelectItem key={rel.value} value={rel.value}>
+                                                                    {rel.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Edit, Trash2, UserPlus, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Category } from "@/types/category.types";
@@ -34,6 +35,7 @@ export function CategoryCard({
     onRemovePlayer
 }: CategoryCardProps) {
     const [selectedPlayer, setSelectedPlayer] = useState<string>("");
+    const navigate = useNavigate();
     const [isSelectOpen, setIsSelectOpen] = useState(false);
 
     const filteredPlayers = useMemo(() => {
@@ -51,18 +53,26 @@ export function CategoryCard({
 
     return (
         <Card className={cn(
-            "group relative transition-all duration-300 hover:shadow-lg hover:ring-1 hover:ring-primary/20 h-fit",
+            "group relative transition-all duration-300 hover:shadow-lg hover:ring-1 hover:ring-primary/20 h-fit cursor-pointer",
             isSelectOpen ? "z-50 rounded-b-none" : "hover:z-50 hover:rounded-b-none"
-        )}>
+        )}
+        onClick={() => navigate(`/categories/${category.id}`)}
+        >
             <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                     <CardTitle className="text-xl text-primary truncate pr-2">{category.name}</CardTitle>
                     {isAdminOrCoach && (
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute top-4 right-4 bg-background/80 backdrop-blur-sm rounded-md p-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => onEdit(category)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(category);
+                            }}>
                                 <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => onDelete(category.id)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(category.id);
+                            }}>
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>
@@ -90,24 +100,37 @@ export function CategoryCard({
                     "transition-all duration-500 ease-in-out overflow-hidden",
                     "top-[calc(100%-1px)]",
                     isSelectOpen ? "max-h-[300px] py-4" : "max-h-0 py-0 group-hover:max-h-[300px] group-hover:py-4"
-                )}>
+                )}
+                onClick={(e) => e.stopPropagation()} // Evitar navegación al hacer clic en el área expandible
+                >
                     <div className="pt-2 border-t space-y-3">
                         
                         {/* Lista de Jugadores con Scroll */}
                         <div className="max-h-[150px] overflow-y-auto pr-1 space-y-1 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                             {category.playerProfiles && category.playerProfiles.length > 0 ? (
                                 category.playerProfiles.map(p => (
-                                    <div key={p.id} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/30 hover:bg-muted/60 transition-colors">
+                                    <div 
+                                        key={p.id} 
+                                        className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/30 hover:bg-muted/60 transition-colors cursor-pointer"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const userId = p.user?.id || p.userId;
+                                            if (userId) navigate(`/players/${userId}`);
+                                        }}
+                                    >
                                         <div className="flex flex-col">
                                             <span className="font-medium">{p.full_name}</span>
                                             <span className="text-xs text-muted-foreground">{p.position || 'N/A'}</span>
                                         </div>
-                                        {isAdminOrCoach && p.user && (
+                                        {isAdminOrCoach && (
                                             <Button 
                                                 variant="ghost" 
                                                 size="icon" 
                                                 className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                                                onClick={() => onRemovePlayer(category.id, p.user!.id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onRemovePlayer(category.id, p.id); // Usamos el ID del perfil de jugador
+                                                }}
                                             >
                                                 <X className="h-3 w-3" />
                                             </Button>

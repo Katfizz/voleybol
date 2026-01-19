@@ -50,6 +50,7 @@ export default function RegisterUserPage() {
                 }
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await userService.createUser(dataToSend as any);
             toast.success(`Usuario ${data.email} creado exitosamente.`);
             setFormKey(prev => prev + 1); // Reiniciar formulario

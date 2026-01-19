@@ -10,6 +10,8 @@ import CategoriesPage from './pages/CategoriesPage';
 import EventsPage from './pages/EventsPage';
 import CreateEventPage from './pages/CreateEventPage';
 import EditEventPage from './pages/EditEventPage';
+import CategoryDetailsPage from './pages/CategoryDetailsPage';
+import PlayerDetailsPage from './pages/PlayerDetailsPage';
 import EventDetailsPage from './pages/EventDetailsPage';
 import MatchDetailsPage from './pages/MatchDetailsPage';
 import EditUserPage from './pages/EditUserPage';
@@ -33,6 +35,8 @@ function App() {
                             <Route path="/users" element={<UsersPage />} />
                             <Route path="/users/:id/edit" element={<EditUserPage />} />
                             <Route path="/categories" element={<CategoriesPage />} />
+                            <Route path="/categories/:id" element={<CategoryDetailsPage />} />
+                            <Route path="/players/:id" element={<PlayerDetailsPage />} />
                             <Route path="/events" element={<EventsPage />} />
                             <Route path="/events/new" element={<CreateEventPage />} />
                             <Route path="/events/:id" element={<EventDetailsPage />} />

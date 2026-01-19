@@ -87,4 +87,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  body[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
 }

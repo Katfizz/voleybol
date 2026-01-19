@@ -75,6 +75,7 @@ export default function EditUserPage() {
             if (!dataToSend.password)  delete dataToSend.password; // No enviar si está vacía
 
             if (id) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 await userService.updateUser(parseInt(id), dataToSend as any);
                 toast.success('Usuario actualizado exitosamente.');
                 setTimeout(() => navigate('/users'), 1500);

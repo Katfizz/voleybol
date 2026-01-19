@@ -11,7 +11,7 @@ export const statisticService = {
         return response.data;
     },
     getPlayerStats: async (playerProfileId: number): Promise<PlayerStatsData> => {
-        const response = await api.get<{ ok: boolean; summary: any; history: any[] }>(`/statistics/player/${playerProfileId}`);
+        const response = await api.get<PlayerStatsData & { ok: boolean }>(`/statistics/player/${playerProfileId}`);
         return { summary: response.data.summary, history: response.data.history };
     }
 };

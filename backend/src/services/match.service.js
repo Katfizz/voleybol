@@ -93,7 +93,7 @@ const recordMatchResults = async (matchId, sets) => {
 const getAllMatches = async () => {
     const matches = await prisma.match.findMany({
         include: {
-            event: { select: { name: true } },
+            event: { select: { name: true, date_time: true } },
             homeCategory: { select: { name: true } },
             awayCategory: { select: { name: true } },
             winnerCategory: { select: { name: true } },
