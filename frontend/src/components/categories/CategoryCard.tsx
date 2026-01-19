@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Edit, Trash2, UserPlus, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Category } from "@/types/category.types";
@@ -36,6 +36,12 @@ export function CategoryCard({
     const [selectedPlayer, setSelectedPlayer] = useState<string>("");
     const [isSelectOpen, setIsSelectOpen] = useState(false);
 
+    const filteredPlayers = useMemo(() => {
+        return availablePlayers.filter(player => 
+            !category.playerProfiles?.some(p => p.user?.id === player.id)
+        );
+    }, [availablePlayers, category.playerProfiles]);
+
     const handleAssign = () => {
         if (selectedPlayer) {
             onAssignPlayer(category.id, parseInt(selectedPlayer));
@@ -62,7 +68,7 @@ export function CategoryCard({
                         </div>
                     )}
                 </div>
-                <CardDescription className="line-clamp-2 group-hover:line-clamp-none transition-all">
+                <CardDescription className="truncate">
                     {category.description || "Sin descripción"}
                 </CardDescription>
             </CardHeader>
@@ -125,11 +131,15 @@ export function CategoryCard({
                                         <SelectValue placeholder="Agregar jugador..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {availablePlayers.map(p => (
-                                            <SelectItem key={p.id} value={p.id.toString()}>
-                                                {p.profile?.full_name || p.email}
-                                            </SelectItem>
-                                        ))}
+                                        {filteredPlayers.length > 0 ? (
+                                            filteredPlayers.map(p => (
+                                                <SelectItem key={p.id} value={p.id.toString()}>
+                                                    {p.profile?.full_name || p.email}
+                                                </SelectItem>
+                                            ))
+                                        ) : (
+                                            <div className="p-2 text-xs text-muted-foreground text-center">No hay jugadores disponibles...</div>
+                                        )}
                                     </SelectContent>
                                 </Select>
                                 <Button 

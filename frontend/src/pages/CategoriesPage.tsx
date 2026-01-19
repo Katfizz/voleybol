@@ -11,6 +11,7 @@ import { type User } from '../types/user.types';
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function CategoriesPage() {
     const { user: currentUser } = useAuth();
@@ -21,6 +22,10 @@ export default function CategoriesPage() {
     
     // Estados para edición y asignación
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [deleteType, setDeleteType] = useState<'CATEGORY' | 'PLAYER'>('CATEGORY');
+    const [playerToRemove, setPlayerToRemove] = useState<{catId: number, pId: number} | null>(null);
 
     const { register, handleSubmit, reset, setValue } = useForm<CreateCategoryDTO>();
 
@@ -79,27 +84,37 @@ export default function CategoriesPage() {
     };
 
     const handleRemovePlayer = async (categoryId: number, playerId: number) => {
-        try {
-            await categoryService.removePlayer(categoryId, playerId);
-            loadData();
-            toast.success('Jugador desasignado');
-        } catch (err) {
-            console.error(err);
-            toast.error('Error al desasignar jugador');
-        }
+        setPlayerToRemove({ catId: categoryId, pId: playerId });
+        setDeleteType('PLAYER');
+        setIsDeleteDialogOpen(true);
     };
 
     const handleDeleteCategory = async (id: number) => {
-        if (!confirm('¿Estás seguro de eliminar este equipo?')) return;
+        setDeleteId(id);
+        setDeleteType('CATEGORY');
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
         try {
-            await categoryService.delete(id);
-            setCategories(prev => prev.filter(c => c.id !== id));
-            toast.success('Categoría eliminada');
+            if (deleteType === 'CATEGORY' && deleteId) {
+                await categoryService.delete(deleteId);
+                setCategories(prev => prev.filter(c => c.id !== deleteId));
+                toast.success('Categoría eliminada');
+            } else if (deleteType === 'PLAYER' && playerToRemove) {
+                await categoryService.removePlayer(playerToRemove.catId, playerToRemove.pId);
+                loadData();
+                toast.success('Jugador desasignado');
+            }
         } catch (err) {
             console.error(err);
-            toast.error('Error al eliminar');
+            toast.error(deleteType === 'CATEGORY' ? 'Error al eliminar' : 'Error al desasignar jugador');
+        } finally {
+            setIsDeleteDialogOpen(false);
+            setDeleteId(null);
+            setPlayerToRemove(null);
         }
-    };
+    }
 
     const startEdit = (category: Category) => {
         setEditingCategory(category);
@@ -204,6 +219,16 @@ export default function CategoriesPage() {
                     </div>
                 )}
             </div>
+
+            <ConfirmDialog 
+                open={isDeleteDialogOpen} 
+                onOpenChange={setIsDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                title={deleteType === 'CATEGORY' ? "¿Eliminar equipo?" : "¿Desasignar jugador?"}
+                description={deleteType === 'CATEGORY' ? "Esta acción eliminará el equipo permanentemente." : "¿Estás seguro de que quieres quitar a este jugador del equipo?"}
+                confirmText="Eliminar"
+                variant="destructive"
+            />
         </div>
     );
 }

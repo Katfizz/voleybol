@@ -1,14 +1,23 @@
-export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE';
 
 export interface Attendance {
     id: number;
-    eventId: number;
-    userProfileId: number; // Vinculado al perfil del jugador/usuario
-    status: AttendanceStatus;
+    event_id: number;
+    player_profile_id: number;
     date: string;
+    status: AttendanceStatus;
+    notes?: string;
+    player_profile?: {
+        full_name: string;
+        position: string;
+    };
 }
 
-export interface RecordAttendanceDTO {
-    userProfileId: number;
-    status: AttendanceStatus;
+export interface CreateAttendanceDTO {
+    date: string;
+    attendances: {
+        player_profile_id: number;
+        status: AttendanceStatus;
+        notes?: string;
+    }[];
 }

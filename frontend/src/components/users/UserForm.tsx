@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format, parse } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -389,10 +389,12 @@ export function UserForm({
                         type="button" 
                         variant="outline" 
                         onClick={onCancel}
+                        disabled={form.formState.isSubmitting}
                     >
                         Cancelar
                     </Button>
-                    <Button type="submit" className="bg-primary">
+                    <Button type="submit" className="bg-primary" disabled={form.formState.isSubmitting}>
+                        {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {submitLabel}
                     </Button>
                 </div>

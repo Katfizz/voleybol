@@ -21,3 +21,8 @@ export interface Match {
     winnerCategory?: Category;
     sets?: Set[];
 }
+
+export interface CreateMatchDTO {
+    home_category_id: number;
+    away_category_id: number;
+}

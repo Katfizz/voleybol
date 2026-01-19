@@ -4,17 +4,22 @@ import { Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { userService } from '../services/user.service';
+import { useAuth } from '../context/AuthContext';
 import { type User } from '../types/user.types';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { UsersTable } from '../components/users/UsersTable';
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function UsersPage() {
+    const { user: currentUser } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -33,13 +38,25 @@ export default function UsersPage() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+        if (currentUser?.id === id) {
+            toast.error("No puedes eliminar tu propia cuenta.");
+            return;
+        }
+        setDeleteId(id);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
         try {
-            await userService.deleteUser(id);
-            setUsers(users.filter(u => u.id !== id));
+            await userService.deleteUser(deleteId);
+            setUsers(users.filter(u => u.id !== deleteId));
             toast.success('Usuario eliminado');
         } catch {
             toast.error('Error al eliminar usuario');
+        } finally {
+            setIsDeleteDialogOpen(false);
+            setDeleteId(null);
         }
     };
 
@@ -87,6 +104,16 @@ export default function UsersPage() {
                     <UsersTable users={filteredUsers} onDelete={handleDelete} />
                 </CardContent>
             </Card>
+
+            <ConfirmDialog 
+                open={isDeleteDialogOpen} 
+                onOpenChange={setIsDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                title="¿Eliminar usuario?"
+                description="Esta acción eliminará al usuario permanentemente y no se puede deshacer."
+                confirmText="Eliminar"
+                variant="destructive"
+            />
         </div>
     );
 }

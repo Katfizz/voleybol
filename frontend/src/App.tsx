@@ -11,6 +11,7 @@ import EventsPage from './pages/EventsPage';
 import CreateEventPage from './pages/CreateEventPage';
 import EditEventPage from './pages/EditEventPage';
 import EventDetailsPage from './pages/EventDetailsPage';
+import MatchDetailsPage from './pages/MatchDetailsPage';
 import EditUserPage from './pages/EditUserPage';
 import { Layout } from './components/Layout';
 import { Toaster } from 'sonner';
@@ -36,6 +37,7 @@ function App() {
                             <Route path="/events/new" element={<CreateEventPage />} />
                             <Route path="/events/:id" element={<EventDetailsPage />} />
                             <Route path="/events/:id/edit" element={<EditEventPage />} />
+                            <Route path="/matches/:id" element={<MatchDetailsPage />} />
                             
                             {/* Landing Page de desarrollo */}
                             <Route path="/" element={<HomePage />} />

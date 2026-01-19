@@ -9,11 +9,14 @@ import { type Event } from '../types/event.types';
 import { EventCard } from '../components/events/EventCard';
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function EventsPage() {
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -35,13 +38,21 @@ export default function EventsPage() {
     }, [loadEvents]);
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Estás seguro de eliminar este evento?')) return;
+        setDeleteId(id);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
         try {
-            await eventService.delete(id);
-            setEvents(events.filter(e => e.id !== id));
+            await eventService.delete(deleteId);
+            setEvents(events.filter(e => e.id !== deleteId));
             toast.success('Evento eliminado');
         } catch {
             toast.error('Error al eliminar el evento');
+        } finally {
+            setIsDeleteDialogOpen(false);
+            setDeleteId(null);
         }
     };
 
@@ -90,6 +101,16 @@ export default function EventsPage() {
                     </div>
                 )}
             </div>
+
+            <ConfirmDialog 
+                open={isDeleteDialogOpen} 
+                onOpenChange={setIsDeleteDialogOpen}
+                onConfirm={confirmDelete}
+                title="¿Eliminar evento?"
+                description="Esta acción eliminará el evento y todos sus datos asociados."
+                confirmText="Eliminar"
+                variant="destructive"
+            />
         </div>
     );
 }
