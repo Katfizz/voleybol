@@ -98,7 +98,13 @@ const getEventById = async (eventId) => {
     const event = await prisma.event.findUnique({
         where: { id },
         include: {
-            categories: true,
+            categories: {
+                include: {
+                    playerProfiles: {
+                        select: { id: true, full_name: true, position: true }
+                    }
+                }
+            },
             practice: true,
             matches: { // Incluir los partidos asociados con detalles de los equipos
                 include: {

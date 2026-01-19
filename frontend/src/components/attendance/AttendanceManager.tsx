@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
-import { Check, X, Clock, AlertCircle, Save, Loader2 } from "lucide-react";
+import { Check, X, AlertCircle, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { attendanceService } from "@/services/attendance.service";
@@ -73,7 +73,7 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
     const toggleStatus = (playerId: number, currentStatus?: AttendanceStatus) => {
         if (!isAdminOrCoach) return;
         
-        const statusCycle: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'];
+        const statusCycle: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'EXCUSED'];
         const nextIndex = currentStatus ? (statusCycle.indexOf(currentStatus) + 1) % statusCycle.length : 0;
         
         setAttendanceMap(prev => ({
@@ -86,7 +86,6 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
         switch (status) {
             case 'PRESENT': return <Badge className="bg-green-500 hover:bg-green-600"><Check className="w-3 h-3 mr-1" /> Presente</Badge>;
             case 'ABSENT': return <Badge variant="destructive"><X className="w-3 h-3 mr-1" /> Ausente</Badge>;
-            case 'LATE': return <Badge className="bg-yellow-500 hover:bg-yellow-600"><Clock className="w-3 h-3 mr-1" /> Tarde</Badge>;
             case 'EXCUSED': return <Badge variant="secondary"><AlertCircle className="w-3 h-3 mr-1" /> Justificado</Badge>;
             default: return <Badge variant="outline" className="text-muted-foreground">Sin registrar</Badge>;
         }

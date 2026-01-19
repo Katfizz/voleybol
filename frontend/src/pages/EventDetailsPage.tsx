@@ -151,17 +151,15 @@ export default function EventDetailsPage() {
                         </div>
                     )}
 
-                    {/* Gestión de Asistencia (Solo Prácticas) */}
-                    {event.type === 'PRACTICE' && (
-                        <div className="mt-8">
-                            <AttendanceManager 
-                                eventId={event.id} 
-                                eventDate={event.date_time} 
-                                categories={event.categories || []} 
-                                isAdminOrCoach={isAdminOrCoach}
-                            />
-                        </div>
-                    )}
+                    {/* Gestión de Asistencia */}
+                    <div className="mt-8">
+                        <AttendanceManager 
+                            eventId={event.id} 
+                            eventDate={event.date_time} 
+                            categories={event.categories || []} 
+                            isAdminOrCoach={isAdminOrCoach}
+                        />
+                    </div>
                 </CardContent>
             </Card>
 

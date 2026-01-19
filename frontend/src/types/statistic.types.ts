@@ -1,20 +1,29 @@
-export interface PlayerStats {
+export interface Statistic {
     id: number;
-    matchId: number;
-    playerProfileId: number;
+    match_id: number;
+    player_profile_id: number;
+    points: number;
     kills: number;
-    blocks: number;
-    aces: number;
-    digs: number;
-    assists: number;
     errors: number;
+    aces: number;
+    blocks: number;
+    assists: number;
+    digs: number;
+    player_profile?: {
+        full_name: string;
+        position: string;
+    };
 }
 
-export interface RecordStatsDTO {
-    kills?: number;
-    blocks?: number;
-    aces?: number;
-    digs?: number;
-    assists?: number;
-    errors?: number;
+export interface CreateStatisticDTO {
+    stats: {
+        player_profile_id: number;
+        points?: number;
+        kills?: number;
+        errors?: number;
+        aces?: number;
+        blocks?: number;
+        assists?: number;
+        digs?: number;
+    }[];
 }
