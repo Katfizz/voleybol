@@ -129,7 +129,8 @@ export function CategoryCard({
                                                 className="h-6 w-6 text-muted-foreground hover:text-destructive"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    onRemovePlayer(category.id, p.id); // Usamos el ID del perfil de jugador
+                                                    const userId = p.user?.id || p.userId;
+                                                    if (userId) onRemovePlayer(category.id, userId);
                                                 }}
                                             >
                                                 <X className="h-3 w-3" />

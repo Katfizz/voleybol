@@ -24,11 +24,11 @@ export const categoryService = {
         await api.delete(`/categories/${id}`);
     },
 
-    assignPlayer: async (categoryId: number, playerProfileId: number): Promise<void> => {
-        await api.post(`/categories/${categoryId}/players`, { playerProfileId });
+    assignPlayer: async (categoryId: number, playerId: number): Promise<void> => {
+        await api.post(`/categories/${categoryId}/players`, { playerId });
     },
 
-    removePlayer: async (categoryId: number, playerProfileId: number): Promise<void> => {
-        await api.delete(`/categories/${categoryId}/players/${playerProfileId}`);
+    removePlayer: async (categoryId: number, playerId: number): Promise<void> => {
+        await api.delete(`/categories/${categoryId}/players/${playerId}`);
     }
 };
