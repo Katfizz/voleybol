@@ -61,7 +61,7 @@ export function EventCard({ event, onClick, isAdminOrCoach, onEdit, onDelete }: 
                             {format(new Date(event.date_time), "MMM", { locale: es })}
                         </span>
                         <span className="block text-2xl font-bold">
-                            {format(new Date(event.date_time), "dd")}
+                            {format(new Date(event.date_time), "dd/yyyy")}
                         </span>
                     </div>
                 </div>
