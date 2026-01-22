@@ -274,7 +274,7 @@ export function UserForm({
                                 control={form.control}
                                 name="birth_date"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col">
+                                    <FormItem>
                                         <FormLabel>Fecha de Nacimiento</FormLabel>
                                         <Popover>
                                             <PopoverTrigger asChild>
