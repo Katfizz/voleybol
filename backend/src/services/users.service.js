@@ -1,7 +1,7 @@
 const prisma = require('../db/prisma');
 const { AppError } = require('../utils/errors');
 const { Role } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 const createUser = async (userData, requestingUser) => {
     const { email, password, role } = userData;
