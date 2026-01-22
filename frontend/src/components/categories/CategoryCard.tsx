@@ -43,25 +43,37 @@ export function CategoryCard({
     const [isSelectOpen, setIsSelectOpen] = useState(false);
 
     const filteredPlayers = useMemo(() => {
-        return availablePlayers.filter(player => {
-            // Si es COACH, permitimos asignarlo si no está ya en la lista de coaches de esta categoría
-            if (player.role === 'COACH') {
-                if (!onAssignCoach) return false; // Verificamos si onAssignCoach existe
-                return !category.coaches?.some(c => c.id === player.id);
+        return availablePlayers.filter(user => {
+            // Lógica para ENTRENADORES
+            if (user.role === 'COACH') {
+                // Un coach está disponible si:
+                // 1. La función para asignarlo existe.
+                if (!onAssignCoach) return false;
+                // 2. No está ya en la lista de coaches de ESTA categoría.
+                // (Un coach puede estar en múltiples categorías).
+                return !category.coaches?.some(c => c.id === user.id);
             }
 
-            // Filtrar si ya está en esta categoría
-            if (category.playerProfiles?.some(p => p.user?.id === player.id)) return false;
+            // Lógica para JUGADORES (asumimos que el resto son jugadores elegibles)
+            if (user.role === 'PLAYER') {
+                // 1. No debe estar ya en esta categoría
+                if (category.playerProfiles?.some(p => p.user?.id === user.id)) {
+                    return false;
+                }
+                
+                // 2. Debe tener un perfil de jugador
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const profile = (user as any).profile;
+                if (!profile) {
+                    return false;
+                }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const profile = (player as any).profile;
+                // 3. No debe estar ya asignado a NINGUNA categoría
+                return !(profile.categories && profile.categories.length > 0);
+            }
 
-            // Validar que el usuario tenga un perfil de jugador antes de permitir la asignación
-            if (!profile) return false;
-
-            // Filtrar si ya tiene una categoría asignada.
-            // Según el servicio de usuarios, esto viene en 'categories' que es un array.
-            return !(profile.categories && profile.categories.length > 0);
+            // Otros roles no se muestran en la lista de asignación
+            return false;
         });
     }, [availablePlayers, category.playerProfiles, category.coaches, onAssignCoach]);
 
@@ -112,10 +124,13 @@ export function CategoryCard({
             </CardHeader>
             
             <CardContent>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
                     <Badge variant="secondary" className="flex gap-1 items-center">
                         <Users className="h-3 w-3" />
                         Plantilla
+                    </Badge>
+                    <Badge variant="outline">
+                        {category._count?.coaches || 0} Entrenadores
                     </Badge>
                     <Badge variant="outline">
                         {category._count?.playerProfiles || 0} Jugadores
@@ -138,8 +153,8 @@ export function CategoryCard({
                             
                             {/* Sección de Entrenadores */}
                             {category.coaches && category.coaches.length > 0 && (
-                                <div className="mb-2">
-                                    <div className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
+                                <div className="mb-4">
+                                    <div className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
                                         <UserCog className="h-3 w-3" /> Entrenadores
                                     </div>
                                     {category.coaches.map(coach => (
@@ -169,40 +184,46 @@ export function CategoryCard({
                                 </div>
                             )}
 
-                            {category.playerProfiles && category.playerProfiles.length > 0 ? (
-                                category.playerProfiles.map(p => (
-                                    <div 
-                                        key={p.id} 
-                                        className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/30 hover:bg-muted/60 transition-colors cursor-pointer"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            const userId = p.user?.id || p.userId;
-                                            if (userId) navigate(`/players/${userId}`);
-                                        }}
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{p.full_name}</span>
-                                            <span className="text-xs text-muted-foreground">{p.position || 'N/A'}</span>
+                            {/* Sección de Jugadores */}
+                            <div>
+                                <div className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                    <Users className="h-3 w-3" /> Jugadores
+                                </div>
+                                {category.playerProfiles && category.playerProfiles.length > 0 ? (
+                                    category.playerProfiles.map(p => (
+                                        <div 
+                                            key={p.id} 
+                                            className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/30 hover:bg-muted/60 transition-colors cursor-pointer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const userId = p.user?.id || p.userId;
+                                                if (userId) navigate(`/players/${userId}`);
+                                            }}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{p.full_name}</span>
+                                                <span className="text-xs text-muted-foreground">{p.position || 'N/A'}</span>
+                                            </div>
+                                            {isAdminOrCoach && (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const userId = p.user?.id || p.userId;
+                                                        if (userId) onRemovePlayer(category.id, userId);
+                                                    }}
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </Button>
+                                            )}
                                         </div>
-                                        {isAdminOrCoach && (
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const userId = p.user?.id || p.userId;
-                                                    if (userId) onRemovePlayer(category.id, userId);
-                                                }}
-                                            >
-                                                <X className="h-3 w-3" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground text-center py-4 italic">No hay jugadores asignados.</p>
-                            )}
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground text-center py-2 italic">No hay jugadores asignados.</p>
+                                )}
+                            </div>
                         </div>
 
                         {/* Agregar Jugador */}

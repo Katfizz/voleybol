@@ -24,7 +24,7 @@ export default function CategoriesPage() {
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [deleteType, setDeleteType] = useState<'CATEGORY' | 'PLAYER'>('CATEGORY');
+    const [deleteType, setDeleteType] = useState<'CATEGORY' | 'PLAYER' | 'COACH'>('CATEGORY');
     const [playerToRemove, setPlayerToRemove] = useState<{catId: number, pId: number} | null>(null);
 
     const { register, handleSubmit, reset, setValue } = useForm<CreateCategoryDTO>();
@@ -38,9 +38,9 @@ export default function CategoriesPage() {
                 isAdminOrCoach ? userService.getUsers() : Promise.resolve([])
             ]);
             setCategories(cats);
-            // Filtramos solo los usuarios que son PLAYER para la lista de asignación
+            // Filtramos usuarios que son PLAYER o COACH para la lista de asignación
             if (isAdminOrCoach) {
-                setAvailablePlayers(users.filter(u => u.role === 'PLAYER'));
+                setAvailablePlayers(users.filter(u => u.role === 'PLAYER' || u.role === 'COACH'));
             }
         } catch (err) {
             console.error(err);
@@ -83,6 +83,23 @@ export default function CategoriesPage() {
         }
     };
 
+    const handleAssignCoach = async (categoryId: number, coachId: number) => {
+        try {
+            await categoryService.assignCoach(categoryId, coachId);
+            loadData();
+            toast.success('Entrenador asignado correctamente');
+        } catch (err) {
+            console.error(err);
+            toast.error('Error al asignar entrenador.');
+        }
+    };
+
+    const handleRemoveCoach = async (categoryId: number, coachId: number) => {
+        setPlayerToRemove({ catId: categoryId, pId: coachId });
+        setDeleteType('COACH');
+        setIsDeleteDialogOpen(true);
+    };
+
     const handleRemovePlayer = async (categoryId: number, playerId: number) => {
         setPlayerToRemove({ catId: categoryId, pId: playerId });
         setDeleteType('PLAYER');
@@ -105,10 +122,14 @@ export default function CategoriesPage() {
                 await categoryService.removePlayer(playerToRemove.catId, playerToRemove.pId);
                 loadData();
                 toast.success('Jugador desasignado');
+            } else if (deleteType === 'COACH' && playerToRemove) {
+                await categoryService.removeCoach(playerToRemove.catId, playerToRemove.pId);
+                loadData();
+                toast.success('Entrenador desasignado');
             }
         } catch (err) {
             console.error(err);
-            toast.error(deleteType === 'CATEGORY' ? 'Error al eliminar' : 'Error al desasignar jugador');
+            toast.error(deleteType === 'CATEGORY' ? 'Error al eliminar' : 'Error al desasignar miembro');
         } finally {
             setIsDeleteDialogOpen(false);
             setDeleteId(null);
@@ -211,6 +232,8 @@ export default function CategoriesPage() {
                             onDelete={handleDeleteCategory}
                             onAssignPlayer={handleAssignPlayer}
                             onRemovePlayer={handleRemovePlayer}
+                            onAssignCoach={handleAssignCoach}
+                            onRemoveCoach={handleRemoveCoach}
                         />
                     ))
                 ) : (
@@ -224,8 +247,8 @@ export default function CategoriesPage() {
                 open={isDeleteDialogOpen} 
                 onOpenChange={setIsDeleteDialogOpen}
                 onConfirm={confirmDelete}
-                title={deleteType === 'CATEGORY' ? "¿Eliminar equipo?" : "¿Desasignar jugador?"}
-                description={deleteType === 'CATEGORY' ? "Esta acción eliminará el equipo permanentemente." : "¿Estás seguro de que quieres quitar a este jugador del equipo?"}
+                title={deleteType === 'CATEGORY' ? "¿Eliminar equipo?" : "¿Desasignar miembro?"}
+                description={deleteType === 'CATEGORY' ? "Esta acción eliminará el equipo permanentemente." : "¿Estás seguro de que quieres quitar a este miembro del equipo?"}
                 confirmText="Eliminar"
                 variant="destructive"
             />
