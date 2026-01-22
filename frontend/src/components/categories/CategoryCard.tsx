@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Edit, Trash2, UserPlus, Users, X } from "lucide-react";
+import { Edit, Trash2, UserPlus, Users, X, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Category } from "@/types/category.types";
 import { type User } from "@/types/user.types";
@@ -23,6 +23,8 @@ interface CategoryCardProps {
     onDelete: (id: number) => void;
     onAssignPlayer: (categoryId: number, playerId: number) => void;
     onRemovePlayer: (categoryId: number, playerId: number) => void;
+    onAssignCoach?: (categoryId: number, coachId: number) => void;
+    onRemoveCoach?: (categoryId: number, coachId: number) => void;
 }
 
 export function CategoryCard({
@@ -32,21 +34,47 @@ export function CategoryCard({
     onEdit,
     onDelete,
     onAssignPlayer,
-    onRemovePlayer
+    onRemovePlayer,
+    onAssignCoach,
+    onRemoveCoach
 }: CategoryCardProps) {
     const [selectedPlayer, setSelectedPlayer] = useState<string>("");
     const navigate = useNavigate();
     const [isSelectOpen, setIsSelectOpen] = useState(false);
 
     const filteredPlayers = useMemo(() => {
-        return availablePlayers.filter(player => 
-            !category.playerProfiles?.some(p => p.user?.id === player.id)
-        );
-    }, [availablePlayers, category.playerProfiles]);
+        return availablePlayers.filter(player => {
+            // Si es COACH, permitimos asignarlo si no está ya en la lista de coaches de esta categoría
+            if (player.role === 'COACH') {
+                if (!onAssignCoach) return false; // Verificamos si onAssignCoach existe
+                return !category.coaches?.some(c => c.id === player.id);
+            }
+
+            // Filtrar si ya está en esta categoría
+            if (category.playerProfiles?.some(p => p.user?.id === player.id)) return false;
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const profile = (player as any).profile;
+
+            // Validar que el usuario tenga un perfil de jugador antes de permitir la asignación
+            if (!profile) return false;
+
+            // Filtrar si ya tiene una categoría asignada.
+            // Según el servicio de usuarios, esto viene en 'categories' que es un array.
+            return !(profile.categories && profile.categories.length > 0);
+        });
+    }, [availablePlayers, category.playerProfiles, category.coaches, onAssignCoach]);
 
     const handleAssign = () => {
         if (selectedPlayer) {
-            onAssignPlayer(category.id, parseInt(selectedPlayer));
+            const userId = parseInt(selectedPlayer);
+            const user = availablePlayers.find(u => u.id === userId);
+            
+             if (user?.role === 'COACH' && onAssignCoach) { // Verificamos si onAssignCoach existe
+                if (onAssignCoach) onAssignCoach(category.id, userId);
+            } else {
+                onAssignPlayer(category.id, userId);
+             }
             setSelectedPlayer("");
         }
     };
@@ -99,14 +127,48 @@ export function CategoryCard({
                     "absolute left-[-1px] right-[-1px] bg-card border-x border-b rounded-b-xl shadow-lg z-10 px-6",
                     "transition-all duration-500 ease-in-out overflow-hidden",
                     "top-[calc(100%-1px)]",
-                    isSelectOpen ? "max-h-[300px] py-4" : "max-h-0 py-0 group-hover:max-h-[300px] group-hover:py-4"
+                    isSelectOpen ? "max-h-[400px] py-4" : "max-h-0 py-0 group-hover:max-h-[400px] group-hover:py-4"
                 )}
                 onClick={(e) => e.stopPropagation()} // Evitar navegación al hacer clic en el área expandible
                 >
                     <div className="pt-2 border-t space-y-3">
                         
                         {/* Lista de Jugadores con Scroll */}
-                        <div className="max-h-[150px] overflow-y-auto pr-1 space-y-1 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                        <div className="max-h-[200px] overflow-y-auto pr-1 space-y-1 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                            
+                            {/* Sección de Entrenadores */}
+                            {category.coaches && category.coaches.length > 0 && (
+                                <div className="mb-2">
+                                    <div className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
+                                        <UserCog className="h-3 w-3" /> Entrenadores
+                                    </div>
+                                    {category.coaches.map(coach => (
+                                        <div 
+                                            key={coach.id} 
+                                            className="flex justify-between items-center text-sm p-2 rounded-md bg-primary/5 border border-primary/10 mb-1"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-primary">{coach.email}</span>
+                                                <span className="text-[10px] text-muted-foreground">Coach</span>
+                                            </div>
+                                            {isAdminOrCoach && onRemoveCoach && (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onRemoveCoach(category.id, coach.id);
+                                                    }}
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
                             {category.playerProfiles && category.playerProfiles.length > 0 ? (
                                 category.playerProfiles.map(p => (
                                     <div 
@@ -152,17 +214,19 @@ export function CategoryCard({
                                     onOpenChange={setIsSelectOpen}
                                 >
                                     <SelectTrigger className="h-9 text-xs">
-                                        <SelectValue placeholder="Agregar jugador..." />
+                                        <SelectValue placeholder="Agregar miembro..." />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {filteredPlayers.length > 0 ? (
                                             filteredPlayers.map(p => (
                                                 <SelectItem key={p.id} value={p.id.toString()}>
-                                                    {p.profile?.full_name || p.email}
+                                                    {p.profile?.full_name || p.email} {p.role === 'COACH' ? '(Coach)' : ''}
                                                 </SelectItem>
                                             ))
                                         ) : (
-                                            <div className="p-2 text-xs text-muted-foreground text-center">No hay jugadores disponibles...</div>
+                                            <SelectItem value="no-members" disabled>
+                                                No hay miembros disponibles...
+                                            </SelectItem>
                                         )}
                                     </SelectContent>
                                 </Select>

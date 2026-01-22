@@ -52,6 +52,19 @@ const assignPlayerToCategory = async (categoryId, playerId, requestingUser) => {
         throw new NotFoundError(`El jugador con ID ${pId} no existe o no tiene un perfil de jugador.`);
     }
 
+    // Verificar si el jugador ya pertenece a alguna categoría.
+    const existingCategory = await prisma.category.findFirst({
+        where: {
+            playerProfiles: {
+                some: { user_id: pId }
+            }
+        }
+    });
+
+    if (existingCategory) {
+        throw new ConflictError(`El jugador ya pertenece a la categoría '${existingCategory.name}'.`);
+    }
+
     // Usar una actualización anidada para que Prisma maneje la conexión de forma atómica.
     // Si no encuentra un playerProfile con el user_id: pId, la operación fallará.
     try {
