@@ -19,12 +19,12 @@ const userCreationValidation = [
             }
 
             // La fecha de nacimiento es necesaria para validar la edad.
-            if (!value.birthDate) {
-                throw new Error('La fecha de nacimiento (birthDate) es obligatoria para los jugadores.');
+            if (!value.birth_date) {
+                throw new Error('La fecha de nacimiento (birth_date) es obligatoria para los jugadores.');
             }
 
             // Lógica para validar la edad y requerir datos del representante si es menor de 18.
-            const birthDateObj = new Date(value.birthDate);
+            const birthDateObj = new Date(value.birth_date);
             const today = new Date();
             let age = today.getFullYear() - birthDateObj.getFullYear();
             const monthDifference = today.getMonth() - birthDateObj.getMonth();
@@ -40,7 +40,7 @@ const userCreationValidation = [
         return true;
     }),
     // Validaciones para los campos dentro del perfil del jugador
-    check('profile.birthDate', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
+    check('profile.birth_date', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
     check('profile.contact_data', 'La información de contacto debe ser un objeto').if((value, { req }) => req.body.role === Role.PLAYER).isObject(),
     check('profile.representative_data', 'Los datos del representante deben ser un objeto').optional().isObject(),
     validateFields
@@ -53,7 +53,7 @@ const userUpdateValidation = [
     // Validaciones para los campos del perfil al actualizar
     check('full_name', 'El nombre completo es obligatorio para los jugadores').optional().isString(),
     check('birth_date', 'La fecha de nacimiento debe ser una fecha válida').optional().isISO8601().toDate(),
-    check('contact_info', 'La información de contacto debe ser un objeto').optional().isObject(),
+    check('contact_data', 'La información de contacto debe ser un objeto').optional().isObject(),
     check('position', 'La posición debe ser una cadena de texto').optional().isString(),
     validateFields
 ];

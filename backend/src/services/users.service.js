@@ -29,14 +29,14 @@ const createUser = async (userData, requestingUser) => {
                 throw new AppError('El perfil es requerido para el rol de jugador', 400);
             }
 
-            const { full_name, birthDate, position, contact_data, representative_data } = profile;
+            const { full_name, birth_date, position, contact_data, representative_data } = profile;
             await tx.playerProfile.create({
                 data: {
                     user: {
                         connect: { id: user.id }
                     },
                     full_name: full_name,
-                    birth_date: birthDate ? new Date(birthDate) : undefined,
+                    birth_date: birth_date ? new Date(birth_date) : undefined,
                     position: position,
                     contact_data: contact_data || undefined, // Guardar el objeto JSON directamente
                     representative_data: representative_data || undefined // Guardar el objeto JSON directamente
@@ -180,19 +180,19 @@ const updateUser = async (id, userData, requestingUser) => {
             if (!profile) {
                 // No hacer nada si no se envían datos del perfil para actualizar
             } else {
-                const { firstName, lastName, birthDate, contact, representativeData, position } = profile;
+                const { full_name, birth_date, contact_data, representative_data, position } = profile;
                 await tx.playerProfile.upsert({
                     where: { user_id: user.id },
                     update: {
-                        full_name: (firstName && lastName) ? `${firstName} ${lastName}` : undefined,
-                        birth_date: birthDate ? new Date(birthDate) : undefined,
-                        contact_data: contact || undefined,
-                        representative_data: representativeData || undefined,
+                        full_name: full_name || undefined,
+                        birth_date: birth_date ? new Date(birth_date) : undefined,
+                        contact_data: contact_data || undefined,
+                        representative_data: representative_data || undefined,
                         position: position || undefined,
                     },
                     create: {
                         user: { connect: { id: user.id } },
-                        full_name: (firstName && lastName) ? `${firstName} ${lastName}` : 'N/A',
+                        full_name: full_name || 'N/A',
                     }
                 });
             }

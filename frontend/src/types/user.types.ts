@@ -1,5 +1,11 @@
 export type UserRole = 'ADMIN' | 'COACH' | 'PLAYER';
 
+export interface RepresentativeData {
+    full_name: string;
+    phone: string;
+    relationship: string;
+}
+
 export interface PlayerProfile {
     id: number;
     userId: number; // ID del usuario, crucial para la navegación
@@ -25,5 +31,21 @@ export interface User {
     profile?: PlayerProfile;
     _count?: {
         categories: number;
+    };
+}
+
+export interface UserPayload {
+    email?: string;
+    password?: string;
+    role?: UserRole;
+    profile?: {
+        full_name?: string;
+        position?: string;
+        birth_date?: string | Date;
+        contact_data?: {
+            phone?: string;
+            address?: string;
+        };
+        representative_data?: RepresentativeData;
     };
 }

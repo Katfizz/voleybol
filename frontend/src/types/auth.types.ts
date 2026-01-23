@@ -1,4 +1,4 @@
-import { type User, type Role } from './user.types';
+import { type User, type UserRole, type RepresentativeData } from './user.types';
 
 export interface LoginResponse {
     ok: boolean;
@@ -7,16 +7,10 @@ export interface LoginResponse {
     token: string;
 }
 
-export interface RepresentativeData {
-    full_name: string;
-    phone: string;
-    relationship: string;
-}
-
 export interface RegisterUserDTO {
     email: string;
     password: string;
-    role: Role;
+    role: UserRole;
     // Campos adicionales para PLAYER
     full_name?: string;
     position?: string;
