@@ -38,7 +38,11 @@ export function MatchCard({ match, isAdminOrCoach, onDelete, onEdit }: MatchCard
                         <div className={cn("font-bold text-lg truncate max-w-[120px] mx-auto", isWinner(match.home_category_id) && "text-primary")} title={match.homeCategory?.name}>
                             {match.homeCategory?.name}
                         </div>
-                        {isWinner(match.home_category_id) && <Badge variant="secondary" className="mt-1"><Trophy className="h-3 w-3 mr-1"/> Ganador</Badge>}
+                        {match.winner_category_id ? (
+                            <Badge variant="secondary" className={cn("mt-1", !isWinner(match.home_category_id) && "invisible")}>
+                                <Trophy className="h-3 w-3 mr-1"/> Ganador
+                            </Badge>
+                        ) : null}
                     </div>
 
                     {/* Score */}
@@ -54,7 +58,11 @@ export function MatchCard({ match, isAdminOrCoach, onDelete, onEdit }: MatchCard
                         <div className={cn("font-bold text-lg truncate max-w-[120px] mx-auto", isWinner(match.away_category_id) && "text-primary")} title={match.awayCategory?.name}>
                             {match.awayCategory?.name}
                         </div>
-                        {isWinner(match.away_category_id) && <Badge variant="secondary" className="mt-1"><Trophy className="h-3 w-3 mr-1"/> Ganador</Badge>}
+                        {match.winner_category_id ? (
+                            <Badge variant="secondary" className={cn("mt-1", !isWinner(match.away_category_id) && "invisible")}>
+                                <Trophy className="h-3 w-3 mr-1"/> Ganador
+                            </Badge>
+                        ) : null}
                     </div>
                 </div>
             </CardHeader>

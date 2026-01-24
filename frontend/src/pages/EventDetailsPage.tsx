@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { MapPin, Calendar, ArrowLeft, Plus, Edit } from "lucide-react";
+import { MapPin, Calendar, ArrowLeft, Plus, Edit, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { eventService } from '../services/event.service';
@@ -120,11 +120,21 @@ export default function EventDetailsPage() {
                         )}
                     </div>
                     <CardDescription className="flex flex-col gap-1 mt-2 text-base">
-                        <span className="flex items-center gap-2"><Calendar className="h-4 w-4" /> {format(new Date(event.date_time), "EEEE, d 'de' MMMM 'a las' HH:mm", { locale: es })}</span>
+                        <span className="flex items-center gap-2"><Calendar className="h-4 w-4" /> {format(new Date(event.date_time), "EEEE, d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}</span>
                         <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {event.location}</span>
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
+                    {event.categories && event.categories.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            {event.categories.map(category => (
+                                <Badge key={category.id} variant="secondary" className="text-sm px-3 py-1">
+                                    <Users className="mr-2 h-3 w-3" />
+                                    {category.name}
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
                     <p className="text-muted-foreground break-words whitespace-pre-wrap">{event.description || "Sin descripción adicional."}</p>
                     
                     {/* Lista de Partidos */}

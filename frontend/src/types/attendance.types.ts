@@ -1,5 +1,11 @@
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'EXCUSED';
 
+export interface AttendanceRecord {
+    player_profile_id: number;
+    status: AttendanceStatus;
+    notes?: string;
+}
+
 export interface Attendance {
     id: number;
     event_id: number;
@@ -18,9 +24,5 @@ export interface Attendance {
 
 export interface CreateAttendanceDTO {
     date: string;
-    attendances: {
-        player_profile_id: number;
-        status: AttendanceStatus;
-        notes?: string;
-    }[];
+    attendances: AttendanceRecord[];
 }
