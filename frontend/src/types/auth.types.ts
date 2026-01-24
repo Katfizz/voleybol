@@ -19,3 +19,8 @@ export interface RegisterUserDTO {
     address?: string;
     representative_data?: RepresentativeData;
 }
+
+export interface LoginCredentials {
+    email: string;
+    password: string;
+}

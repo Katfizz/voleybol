@@ -8,9 +8,9 @@ import { categoryService } from '../services/category.service';
 import { matchService } from '../services/match.service';
 import { profileService } from '../services/profile.service';
 import { type Announcement, type CreateAnnouncementDTO } from '../types/announcement.types';
-import { type Category } from '../types/category.types';
 import { type Match } from '../types/match.types';
 import { type User } from '../types/user.types';
+import { type TopTeam } from '../types/dashboard.types';
 import { Button } from "@/components/ui/button";
 import { CreateAnnouncementDialog } from '../components/announcements/CreateAnnouncementDialog';
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -18,14 +18,6 @@ import { TopTeamsCarousel } from '../components/dashboard/TopTeamsCarousel';
 import { RecentMatchesCard } from '../components/dashboard/RecentMatchesCard';
 import { AnnouncementsCarousel } from '../components/dashboard/AnnouncementsCarousel';
 import { PlayerProfileSummary } from '../components/dashboard/PlayerProfileSummary';
-
-interface TopTeam extends Category {
-    stats: {
-        wins: number;
-        losses: number;
-        winRate: number;
-    };
-}
 
 export default function HomePage() {
     const { user } = useAuth();

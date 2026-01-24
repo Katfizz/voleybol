@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { type LoginCredentials } from '../types/auth.types';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,20 +16,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Definimos la estructura de los datos del formulario
-interface LoginFormData {
-    email: string;
-    password: string;
-}
-
 export default function LoginPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginCredentials>();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const onSubmit = async (data: LoginFormData) => {
+    const onSubmit = async (data: LoginCredentials) => {
         setLoading(true);
         setError('');
         try {
