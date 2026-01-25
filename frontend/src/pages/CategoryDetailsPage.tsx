@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Users, Activity, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowLeft, Trophy, Users, Activity, TrendingUp, TrendingDown, UserCog } from "lucide-react";
 import { toast } from "sonner";
 
 import { categoryService } from '../services/category.service';
@@ -33,7 +33,12 @@ export default function CategoryDetailsPage() {
             const teamMatches = allMatches.filter((m: Match) => 
                 m.home_category_id === categoryId || m.away_category_id === categoryId
             );
-            setMatches(teamMatches);
+
+            // Obtener detalles completos (incluyendo sets) para los partidos filtrados
+            const detailedMatches = await Promise.all(
+                teamMatches.map((m: Match) => matchService.getById(m.id))
+            );
+            setMatches(detailedMatches);
         } catch {
             toast.error('Error al cargar los detalles del equipo');
             navigate('/categories');
@@ -133,7 +138,36 @@ export default function CategoryDetailsPage() {
                     <TabsTrigger value="matches">Partidos</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="roster" className="mt-6">
+                <TabsContent value="roster" className="mt-6 space-y-6">
+                    {category.coaches && category.coaches.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <UserCog className="h-5 w-5" /> Entrenadores
+                                </CardTitle>
+                                <CardDescription>Cuerpo técnico asignado.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {category.coaches.map((coach) => (
+                                        <div 
+                                            key={coach.id} 
+                                            className="flex items-center space-x-4 p-4 border rounded-lg"
+                                        >
+                                            <Avatar>
+                                                <AvatarFallback>{getInitials(coach.profile?.full_name || coach.email)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="text-sm font-medium leading-none">{coach.profile?.full_name || coach.email}</p>
+                                                <p className="text-xs text-muted-foreground mt-1">Entrenador</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">

@@ -32,6 +32,7 @@ export function EventCard({ event, onClick, isAdminOrCoach, onEdit, onDelete }: 
             default: return type;
         }
     };
+const isPastEvent = new Date(event.date_time) < new Date();
 
     return (
         <Card 
@@ -40,23 +41,26 @@ export function EventCard({ event, onClick, isAdminOrCoach, onEdit, onDelete }: 
         >
             {isAdminOrCoach && (
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/80 hover:bg-background" onClick={(e) => { e.stopPropagation(); onEdit?.(event); }}>
-                        <Edit className="h-4 w-4" />
-                    </Button>
+                    {!isPastEvent && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/80 hover:bg-background" onClick={(e) => { e.stopPropagation(); onEdit?.(event); }}>
+                            <Edit className="h-4 w-4" />
+                        </Button>
+                    )}
                     <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/80 hover:bg-background text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); onDelete?.(event.id); }}>
                         <Trash2 className="h-4 w-4" />
                     </Button>
                 </div>
             )}
+            
             <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                    <div className="space-y-1 pr-8">
+                <div className="flex justify-between items-start gap-4">
+                    <div className="space-y-1 flex-1 min-w-0">
                         <Badge variant={getBadgeVariant(event.type)} className="mb-1">
                             {getTypeName(event.type)}
                         </Badge>
-                        <CardTitle className="text-lg leading-tight">{event.name}</CardTitle>
+                        <CardTitle className="text-lg leading-tight break-words">{event.name}</CardTitle>
                     </div>
-                    <div className="text-center bg-muted/30 p-2 rounded-md min-w-[60px]">
+                    <div className="text-center bg-muted/30 p-2 rounded-md min-w-[60px] shrink-0">
                         <span className="block text-xs font-bold uppercase text-muted-foreground">
                             {format(new Date(event.date_time), "MMM", { locale: es })}
                         </span>

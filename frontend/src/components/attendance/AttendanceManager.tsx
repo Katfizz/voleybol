@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Check, X, Clock, Save, Users, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { attendanceService } from "../../services/attendance.service";
 import { type Category } from "../../types/category.types";
@@ -38,6 +39,9 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
         format(new Date(eventDate), "yyyy-MM-dd")
     );
     const [attendanceMap, setAttendanceMap] = useState<Record<number, AttendanceRecord>>({});
+    const [hasExistingData, setHasExistingData] = useState(false);
+    const [existingRecords, setExistingRecords] = useState<AttendanceRecord[]>([]);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Validar que las categorías tengan jugadores
@@ -58,6 +62,9 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
             } else if (Array.isArray(response)) {
                 records = response;
             }
+
+            setHasExistingData(records.length > 0);
+            setExistingRecords(records);
             
             records.forEach((record) => {
                     map[record.player_profile_id] = {
@@ -92,7 +99,18 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
         }));
     };
 
-    const handleSave = async () => {
+    const handleNotesChange = (playerId: number, notes: string) => {
+        setAttendanceMap(prev => ({
+            ...prev,
+            [playerId]: {
+                player_profile_id: playerId,
+                status: prev[playerId]?.status || 'PRESENT',
+                notes
+            }
+        }));
+    };
+
+    const executeSave = async () => {
         setLoading(true);
         try {
             // Filtrar usuarios fantasma: Solo enviar datos de jugadores que están actualmente en las categorías del evento
@@ -101,14 +119,22 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
                 cat.playerProfiles?.forEach(p => validPlayerIds.add(p.id));
             });
 
-            const attendances = Object.values(attendanceMap).filter(record => 
-                validPlayerIds.has(record.player_profile_id)
-            );
+            const attendances = Object.values(attendanceMap)
+                .filter(record => validPlayerIds.has(record.player_profile_id))
+                .map(record => ({ ...record, notes: record.notes || undefined }));
 
             if (attendances.length === 0) {
                 toast.info("No hay registros válidos para guardar");
                 setLoading(false);
                 return;
+            }
+
+            if (hasExistingData && existingRecords.length > 0) {
+                await Promise.all(existingRecords.map(record => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    if ((record as any).id) return attendanceService.delete((record as any).id);
+                    return Promise.resolve();
+                }));
             }
 
             await attendanceService.record(eventId, {
@@ -117,12 +143,22 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
             });
             toast.success("Asistencia guardada correctamente");
             setOpen(false);
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            const errorMessage = error?.response?.data?.error?.message || error?.response?.data?.msg || "Error al guardar la asistencia";
+            const err = error as AxiosError<{ error?: { message: string }, msg?: string }>;
+            const errorMessage = err.response?.data?.error?.message || err.response?.data?.msg || "Error al guardar la asistencia";
             toast.error(errorMessage);
         } finally {
             setLoading(false);
+            setIsConfirmOpen(false);
+        }
+    };
+
+    const handleSaveClick = () => {
+        if (hasExistingData) {
+            setIsConfirmOpen(true);
+        } else {
+            executeSave();
         }
     };
 
@@ -138,6 +174,7 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
     if (!isAdminOrCoach) return null;
 
     return (
+        <>
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" className="w-full md:w-auto gap-2">
@@ -206,7 +243,7 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
                                                 category.playerProfiles.map(player => {
                                                     const status = attendanceMap[player.id]?.status;
                                                     return (
-                                                        <div key={player.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors group">
+                                                        <div key={player.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors group gap-3">
                                                             <div className="flex items-center gap-3">
                                                                 <Avatar className="h-10 w-10 border">
                                                                     <AvatarFallback className="bg-primary/10 text-primary font-medium">
@@ -219,7 +256,14 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
                                                                 </div>
                                                             </div>
                                                             
-                                                            <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border">
+                                                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                                                <Input 
+                                                                    placeholder="Notas..."
+                                                                    value={attendanceMap[player.id]?.notes || ""}
+                                                                    onChange={(e) => handleNotesChange(player.id, e.target.value)}
+                                                                    className="h-9 flex-1 sm:w-[180px]"
+                                                                />
+                                                                <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border shrink-0">
                                                                 <Button 
                                                                     size="sm" 
                                                                     variant={status === 'PRESENT' ? 'default' : 'ghost'}
@@ -248,6 +292,7 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
                                                                     <Clock className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Justif.</span>
                                                                 </Button>
                                                             </div>
+                                                            </div>
                                                         </div>
                                                     );
                                                 })
@@ -272,7 +317,7 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
 
                 <DialogFooter className="p-4 border-t bg-muted/10">
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSave} disabled={loading} className="min-w-[140px]">
+                    <Button onClick={handleSaveClick} disabled={loading} className="min-w-[140px]">
                         {loading ? (
                             <>Guardando...</>
                         ) : (
@@ -284,5 +329,37 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Asistencia ya registrada</DialogTitle>
+                    <DialogDescription>
+                        Ya existe un registro de asistencia para esta fecha. ¿Desea sobrescribirlo con la nueva información?
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="text-sm bg-muted/50 p-3 rounded-md border">
+                    <p className="font-semibold mb-2">Registros actuales ({existingRecords.length}):</p>
+                    <ul className="list-disc pl-4 space-y-1 max-h-[150px] overflow-y-auto">
+                        {existingRecords.map(rec => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const record = rec as any;
+                            const name = record.player_profile?.full_name || "Jugador";
+                            const statusMap: Record<string, string> = { PRESENT: 'Presente', ABSENT: 'Ausente', EXCUSED: 'Justificado' };
+                            return (
+                                <li key={record.id} className="text-muted-foreground">
+                                    <span className="font-medium text-foreground">{name}</span>: {statusMap[record.status] || record.status}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsConfirmOpen(false)}>Cancelar</Button>
+                    <Button onClick={executeSave}>Sobrescribir</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </>
     );
 }
