@@ -26,7 +26,9 @@ export function RecentMatchesCard({ matches }: RecentMatchesCardProps) {
                                 <div key={match.id} className="flex flex-col gap-2 border-b pb-3 last:border-0 last:pb-0">
                                     <div className="flex justify-between items-center text-xs text-muted-foreground">
                                         <span>{match.event?.date_time ? format(new Date(match.event.date_time), "dd MMM", { locale: es }) : "-"}</span>
-                                        <Badge variant="outline" className="text-[10px] h-5">{match.event?.name}</Badge>
+                                        <Badge variant="outline" className="text-[10px] h-5 max-w-[150px] truncate" title={match.event?.name}>
+                                            {match.event?.name}
+                                        </Badge>
                                     </div>
                                     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 font-medium text-sm">
                                         <span className={`truncate text-right ${match.winner_category_id === match.home_category_id ? 'text-primary font-bold' : ''}`}>

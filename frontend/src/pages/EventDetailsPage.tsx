@@ -31,6 +31,7 @@ export default function EventDetailsPage() {
     const [isResultsOpen, setIsResultsOpen] = useState(false);
 
     const isAdminOrCoach = user?.role === 'ADMIN' || user?.role === 'COACH';
+    const isPastEvent = event ? new Date(event.date_time) < new Date() : false;
 
     const loadEvent = useCallback(async (eventId: number) => {
         try {
@@ -108,9 +109,11 @@ export default function EventDetailsPage() {
                         </div>
                         {isAdminOrCoach && (
                             <div className="flex gap-2">
-                                <Button variant="outline" onClick={() => navigate(`/events/${event.id}/edit`)}>
-                                    <Edit className="mr-2 h-4 w-4" /> Editar
-                                </Button>
+                                {!isPastEvent && (
+                                    <Button variant="outline" onClick={() => navigate(`/events/${event.id}/edit`)}>
+                                        <Edit className="mr-2 h-4 w-4" /> Editar
+                                    </Button>
+                                )}
                                 {(event.type === 'MATCH' || event.type === 'TOURNAMENT') && (
                                     <Button onClick={() => setIsCreateMatchOpen(true)}>
                                         <Plus className="mr-2 h-4 w-4" /> Agregar Partido
@@ -136,7 +139,7 @@ export default function EventDetailsPage() {
                         </div>
                     )}
                     <p className="text-muted-foreground break-words whitespace-pre-wrap">{event.description || "Sin descripción adicional."}</p>
-                    
+
                     {/* Lista de Partidos */}
                     {(event.type === 'MATCH' || event.type === 'TOURNAMENT') && (
                         <div className="mt-8 space-y-4">
@@ -144,9 +147,9 @@ export default function EventDetailsPage() {
                             {event.matches && event.matches.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {event.matches.map(match => (
-                                        <MatchCard 
-                                            key={match.id} 
-                                            match={match} 
+                                        <MatchCard
+                                            key={match.id}
+                                            match={match}
                                             isAdminOrCoach={isAdminOrCoach}
                                             onDelete={(id) => setDeleteMatchId(id)}
                                             onEdit={handleEditResults}
@@ -163,21 +166,21 @@ export default function EventDetailsPage() {
 
                     {/* Gestión de Asistencia */}
                     <div className="mt-8">
-                        <AttendanceManager 
-                            eventId={event.id} 
-                            eventDate={event.date_time} 
-                            categories={event.categories || []} 
+                        <AttendanceManager
+                            eventId={event.id}
+                            eventDate={event.date_time}
+                            categories={event.categories || []}
                             isAdminOrCoach={isAdminOrCoach}
                         />
                     </div>
                 </CardContent>
             </Card>
 
-            <CreateMatchDialog 
-                open={isCreateMatchOpen} 
-                onOpenChange={setIsCreateMatchOpen} 
-                categories={event.categories || []} 
-                onSubmit={handleCreateMatch} 
+            <CreateMatchDialog
+                open={isCreateMatchOpen}
+                onOpenChange={setIsCreateMatchOpen}
+                categories={event.categories || []}
+                onSubmit={handleCreateMatch}
             />
 
             <MatchResultsDialog
@@ -187,8 +190,8 @@ export default function EventDetailsPage() {
                 onSubmit={handleUpdateResults}
             />
 
-            <ConfirmDialog 
-                open={!!deleteMatchId} 
+            <ConfirmDialog
+                open={!!deleteMatchId}
                 onOpenChange={(open) => !open && setDeleteMatchId(null)}
                 onConfirm={handleDeleteMatch}
                 title="¿Eliminar partido?"

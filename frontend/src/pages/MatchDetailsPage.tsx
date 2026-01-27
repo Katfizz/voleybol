@@ -46,7 +46,7 @@ export default function MatchDetailsPage() {
                     // Filtrar jugadores por categoría (equipo)
                     const homeCat = eventData.categories.find(c => c.id === matchData.home_category_id);
                     const awayCat = eventData.categories.find(c => c.id === matchData.away_category_id);
-                    
+
                     // Extraer usuarios de los perfiles
                     if (homeCat && homeCat.playerProfiles) {
                         setHomePlayers(homeCat.playerProfiles.map(p => ({ id: p.id, profile: p }) as unknown as User));
@@ -104,28 +104,29 @@ export default function MatchDetailsPage() {
             <Card>
                 <CardHeader className="text-center border-b bg-muted/10 pb-8">
                     <CardDescription className="mb-2 uppercase tracking-widest text-xs font-bold">Resultado Final</CardDescription>
-                    <div className="flex justify-between items-center gap-4 md:gap-12">
+                    <div className="grid grid-cols-3 items-center gap-2 md:gap-4">
                         {/* Home Team */}
-                        <div className="flex-1 flex flex-col items-center">
-                            <CardTitle className={cn("text-2xl md:text-3xl mb-2", isWinner(match.home_category_id) && "text-primary")}>
+                        <div className="flex flex-col items-end text-right min-w-0">
+                            <CardTitle className={cn("text-xl md:text-2xl mb-2 truncate w-full", isWinner(match.home_category_id) && "text-primary")} title={match.homeCategory?.name}>
                                 {match.homeCategory?.name}
                             </CardTitle>
-                            {isWinner(match.home_category_id) && <Badge variant="secondary"><Trophy className="h-3 w-3 mr-1"/> Ganador</Badge>}
+                            {isWinner(match.home_category_id) && <Badge variant="secondary" className="whitespace-nowrap"><Trophy className="h-3 w-3 mr-1" /> Ganador</Badge>}
                         </div>
 
                         {/* Score */}
-                        <div className="flex flex-col items-center px-4">
-                            <div className="text-5xl md:text-6xl font-black font-mono tracking-tighter">
+                        <div className="flex flex-col items-center justify-center bg-primary/10 rounded-xl p-3 md:p-4 border border-primary/20">
+                            <div className="text-4xl md:text-5xl font-black font-mono tracking-tighter leading-none">
                                 {match.home_sets_won} - {match.away_sets_won}
                             </div>
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">SETS</span>
                         </div>
 
                         {/* Away Team */}
-                        <div className="flex-1 flex flex-col items-center">
-                            <CardTitle className={cn("text-2xl md:text-3xl mb-2", isWinner(match.away_category_id) && "text-primary")}>
+                        <div className="flex flex-col items-start text-left min-w-0">
+                            <CardTitle className={cn("text-xl md:text-2xl mb-2 truncate w-full", isWinner(match.away_category_id) && "text-primary")} title={match.awayCategory?.name}>
                                 {match.awayCategory?.name}
                             </CardTitle>
-                            {isWinner(match.away_category_id) && <Badge variant="secondary"><Trophy className="h-3 w-3 mr-1"/> Ganador</Badge>}
+                            {isWinner(match.away_category_id) && <Badge variant="secondary" className="whitespace-nowrap"><Trophy className="h-3 w-3 mr-1" /> Ganador</Badge>}
                         </div>
                     </div>
                 </CardHeader>
@@ -155,8 +156,8 @@ export default function MatchDetailsPage() {
                 <MatchStatsTable stats={awayStats} teamName={match.awayCategory?.name || "Visitante"} />
             </div>
 
-            <MatchStatisticsDialog 
-                open={isStatsOpen} 
+            <MatchStatisticsDialog
+                open={isStatsOpen}
                 onOpenChange={setIsStatsOpen}
                 homePlayers={homePlayers}
                 awayPlayers={awayPlayers}

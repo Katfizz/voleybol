@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "description": "Backend for the volleyball club management app.",
   "main": "src/server.js",
-  "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "db:seed": "prisma db seed"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -26,5 +21,12 @@
   },
   "prisma": {
     "seed": "node prisma/seed.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:seed": "prisma db seed",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate"
   }
 }

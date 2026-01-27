@@ -19,13 +19,13 @@ export default function CategoriesPage() {
     const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     // Estados para edición y asignación
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [deleteType, setDeleteType] = useState<'CATEGORY' | 'PLAYER' | 'COACH'>('CATEGORY');
-    const [playerToRemove, setPlayerToRemove] = useState<{catId: number, pId: number} | null>(null);
+    const [playerToRemove, setPlayerToRemove] = useState<{ catId: number, pId: number } | null>(null);
 
     const { register, handleSubmit, reset, setValue } = useForm<CreateCategoryDTO>();
 
@@ -56,6 +56,13 @@ export default function CategoriesPage() {
 
     const onSubmit: SubmitHandler<CreateCategoryDTO> = async (data) => {
         if (!isAdminOrCoach) return;
+
+        // Validación manual para mostrar el Sonner
+        if (!data.name || data.name.trim() === '') {
+            toast.error('Debes colocar un nombre para el equipo');
+            return;
+        }
+
         try {
             if (editingCategory) {
                 await categoryService.update(editingCategory.id, data);
@@ -152,7 +159,7 @@ export default function CategoriesPage() {
     // Filtrado de categorías
     const filteredCategories = useMemo(() => {
         if (!searchTerm) return categories;
-        return categories.filter(cat => 
+        return categories.filter(cat =>
             cat.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [categories, searchTerm]);
@@ -165,15 +172,15 @@ export default function CategoriesPage() {
                 <h2 className="text-3xl font-bold text-primary flex items-center gap-2">
                     <Trophy className="h-8 w-8" /> Equipos y Categorías
                 </h2>
-                
+
                 {/* Buscador */}
                 <div className="w-full md:w-1/3">
                     <InputGroup>
                         <InputGroupAddon>
                             <Search className="h-4 w-4" />
                         </InputGroupAddon>
-                        <InputGroupInput 
-                            placeholder="Buscar equipo..." 
+                        <InputGroupInput
+                            placeholder="Buscar equipo..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -190,17 +197,17 @@ export default function CategoriesPage() {
                     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col md:flex-row gap-4 items-start">
                         <div className="w-full md:w-1/3">
                             <InputGroup>
-                                <InputGroupInput 
-                                    {...register('name', { required: true })} 
-                                    placeholder="Nombre del equipo (Ej: Sub-18 Femenino)" 
+                                <InputGroupInput
+                                    {...register('name')}
+                                    placeholder="Nombre del equipo (Ej: Sub-18 Femenino)"
                                 />
                             </InputGroup>
                         </div>
                         <div className="w-full md:w-1/2">
                             <InputGroup>
-                                <InputGroupTextarea 
-                                    {...register('description')} 
-                                    placeholder="Descripción breve del equipo..." 
+                                <InputGroupTextarea
+                                    {...register('description')}
+                                    placeholder="Descripción breve del equipo..."
                                     className="min-h-[42px] h-[42px] py-2"
                                 />
                             </InputGroup>
@@ -223,7 +230,7 @@ export default function CategoriesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCategories.length > 0 ? (
                     filteredCategories.map(category => (
-                        <CategoryCard 
+                        <CategoryCard
                             key={category.id}
                             category={category}
                             isAdminOrCoach={isAdminOrCoach}
@@ -243,8 +250,8 @@ export default function CategoriesPage() {
                 )}
             </div>
 
-            <ConfirmDialog 
-                open={isDeleteDialogOpen} 
+            <ConfirmDialog
+                open={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
                 onConfirm={confirmDelete}
                 title={deleteType === 'CATEGORY' ? "¿Eliminar equipo?" : "¿Desasignar miembro?"}

@@ -53,22 +53,28 @@ export default function HomePage() {
 
             setAnnouncements(announcementsData);
 
+            // Filtrar solo los partidos que ya han tenido lugar (para el dashboard)
+            const now = new Date();
+            const pastMatches = matchesData.filter(m =>
+                m.event?.date_time && new Date(m.event.date_time) < now
+            );
+
             // Procesar Top Teams (Lógica simple en frontend por ahora)
+            // Usamos pastMatches para que los partidos futuros no afecten el winrate
             const teamsWithStats = categoriesData.map(cat => {
-                const teamMatches = matchesData.filter(m => m.home_category_id === cat.id || m.away_category_id === cat.id);
+                const teamMatches = pastMatches.filter(m => m.home_category_id === cat.id || m.away_category_id === cat.id);
                 const wins = teamMatches.filter(m => m.winner_category_id === cat.id).length;
                 const losses = teamMatches.length - wins;
                 const winRate = teamMatches.length > 0 ? Math.round((wins / teamMatches.length) * 100) : 0;
                 return { ...cat, stats: { wins, losses, winRate } };
             });
-            
+
             // Ordenar por victorias y tomar los top 3
             const sortedTeams = teamsWithStats.sort((a, b) => b.stats.wins - a.stats.wins).slice(0, 3);
             setTopTeams(sortedTeams);
 
-            // Procesar Partidos Recientes (últimos 10)
-            const sortedMatches = matchesData
-                .filter(m => m.event?.date_time)
+            // Procesar Partidos Recientes (últimos 10 que ya se jugaron)
+            const sortedMatches = pastMatches
                 .sort((a, b) => new Date(b.event!.date_time).getTime() - new Date(a.event!.date_time).getTime())
                 .slice(0, 10);
             setRecentMatches(sortedMatches);
@@ -132,7 +138,7 @@ export default function HomePage() {
                     <h1 className="text-3xl font-bold text-primary">Hola, {(playerData?.profile?.full_name || user?.profile?.full_name)?.split(' ')[0] || 'Usuario'} 👋</h1>
                     <p className="text-muted-foreground">Aquí tienes un resumen de la actividad del club.</p>
                 </div>
-                
+
                 {canManage && (
                     <Button onClick={() => { setEditingAnnouncement(undefined); setIsCreateOpen(true); }}>
                         <Plus className="mr-2 h-4 w-4" /> Publicar Anuncio
@@ -166,8 +172,8 @@ export default function HomePage() {
                 </div>
             )}
 
-            <CreateAnnouncementDialog 
-                open={isCreateOpen} 
+            <CreateAnnouncementDialog
+                open={isCreateOpen}
                 onOpenChange={(open) => {
                     setIsCreateOpen(open);
                     if (!open) setEditingAnnouncement(undefined);
@@ -180,7 +186,7 @@ export default function HomePage() {
                 onSubmit={handleCreateOrUpdate}
             />
 
-            <ConfirmDialog 
+            <ConfirmDialog
                 open={!!deleteId}
                 onOpenChange={(open) => !open && setDeleteId(null)}
                 onConfirm={handleDelete}

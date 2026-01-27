@@ -1,5 +1,5 @@
 const { PrismaClient, Role } = require("@prisma/client");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const config = require("../src/config/config"); // Usar la configuración centralizada
 
 const prisma = new PrismaClient();
@@ -17,7 +17,7 @@ async function main() {
     // Esto evita errores de nombres de tablas y maneja la concurrencia correctamente.
     await prisma.user.upsert({
       where: { email: adminEmail },
-      update: {}, 
+      update: {},
       create: {
         email: adminEmail,
         password_hash: hashedPassword,

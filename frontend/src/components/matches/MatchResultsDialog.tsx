@@ -5,19 +5,19 @@ import { type Match } from "@/types/match.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
 } from "@/components/ui/form";
 
 interface MatchResultsDialogProps {
@@ -43,7 +43,7 @@ export function MatchResultsDialog({ open, onOpenChange, match, onSubmit }: Matc
                 home_score: s.home_score,
                 away_score: s.away_score
             })) || [{ home_score: 0, away_score: 0 }]; // Al menos un set por defecto
-            
+
             form.reset({ sets: existingSets });
         }
     }, [match, open, form]);
@@ -68,7 +68,7 @@ export function MatchResultsDialog({ open, onOpenChange, match, onSubmit }: Matc
                         {match?.homeCategory?.name} vs {match?.awayCategory?.name}
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                         <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2">

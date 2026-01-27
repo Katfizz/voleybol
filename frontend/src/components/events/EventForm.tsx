@@ -9,42 +9,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    FormDescription,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { type Category } from "@/types/category.types";
 
 const eventSchema = z.object({
-  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
-  type: z.enum(["MATCH", "PRACTICE", "TOURNAMENT"]),
-  date: z.date().refine((date) => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return date >= today;
-  }, "La fecha no puede ser anterior a hoy"),
-  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Hora inválida"),
-  location: z.string().min(3, "La ubicación es requerida"),
-  description: z.string().optional(),
-  categoryIds: z.array(z.number()).min(1, "Debe seleccionar al menos un equipo"),
+    name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+    type: z.enum(["MATCH", "PRACTICE", "TOURNAMENT"]),
+    date: z.date(),
+    time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Hora inválida"),
+    location: z.string().min(3, "La ubicación es requerida"),
+    description: z.string().optional(),
+    categoryIds: z.array(z.number()).min(1, "Debe seleccionar al menos un equipo"),
+}).refine((data) => {
+    const now = new Date();
+    const eventDateTime = new Date(data.date);
+    const [hours, minutes] = data.time.split(':').map(Number);
+    eventDateTime.setHours(hours, minutes, 0, 0);
+
+    return eventDateTime > now;
+}, {
+    message: "No puedes programar un evento para una hora que ya pasó",
+    path: ["time"],
 });
 
 export type EventFormValues = z.infer<typeof eventSchema>;
@@ -57,9 +63,9 @@ interface EventFormProps {
     submitLabel?: string;
 }
 
-export function EventForm({ 
-    defaultValues, 
-    onSubmit, 
+export function EventForm({
+    defaultValues,
+    onSubmit,
     onCancel,
     categories,
     submitLabel = "Guardar Evento"
@@ -137,7 +143,7 @@ export function EventForm({
                                         </FormControl>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} initialFocus />
+                                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus />
                                     </PopoverContent>
                                 </Popover>
                                 <FormMessage />

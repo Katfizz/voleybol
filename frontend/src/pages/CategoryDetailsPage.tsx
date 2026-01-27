@@ -28,9 +28,9 @@ export default function CategoryDetailsPage() {
                 matchService.getAll()
             ]);
             setCategory(catData);
-            
+
             // Filtrar partidos donde participa este equipo
-            const teamMatches = allMatches.filter((m: Match) => 
+            const teamMatches = allMatches.filter((m: Match) =>
                 m.home_category_id === categoryId || m.away_category_id === categoryId
             );
 
@@ -54,14 +54,17 @@ export default function CategoryDetailsPage() {
     }, [id, loadData]);
 
     const stats = useMemo(() => {
-        if (!category) return { played: 0, wins: 0, losses: 0, winRate: 0 };
-        
-        const played = matches.length;
-        const wins = matches.filter(m => m.winner_category_id === category.id).length;
-        const losses = matches.filter(m => m.winner_category_id && m.winner_category_id !== category.id).length;
+        if (!category) return { played: 0, wins: 0, losses: 0, winRate: 0, pastMatches: [] };
+
+        const now = new Date();
+        const pastMatches = matches.filter(m => m.event?.date_time && new Date(m.event.date_time) < now);
+
+        const played = pastMatches.length;
+        const wins = pastMatches.filter(m => m.winner_category_id === category.id).length;
+        const losses = pastMatches.filter(m => m.winner_category_id && m.winner_category_id !== category.id).length;
         const winRate = played > 0 ? Math.round((wins / played) * 100) : 0;
 
-        return { played, wins, losses, winRate };
+        return { played, wins, losses, winRate, pastMatches };
     }, [matches, category]);
 
     const getInitials = (name: string) => {
@@ -128,7 +131,7 @@ export default function CategoryDetailsPage() {
                 </div>
                 {/* Columna Derecha: Gráfico */}
                 <div className="md:col-span-3">
-                    <TeamPerformanceChart matches={matches} categoryId={category.id} />
+                    <TeamPerformanceChart matches={stats.pastMatches} categoryId={category.id} />
                 </div>
             </div>
 
@@ -137,7 +140,7 @@ export default function CategoryDetailsPage() {
                     <TabsTrigger value="roster">Plantilla</TabsTrigger>
                     <TabsTrigger value="matches">Partidos</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="roster" className="mt-6 space-y-6">
                     {category.coaches && category.coaches.length > 0 && (
                         <Card>
@@ -150,8 +153,8 @@ export default function CategoryDetailsPage() {
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {category.coaches.map((coach) => (
-                                        <div 
-                                            key={coach.id} 
+                                        <div
+                                            key={coach.id}
                                             className="flex items-center space-x-4 p-4 border rounded-lg"
                                         >
                                             <Avatar>
@@ -179,8 +182,8 @@ export default function CategoryDetailsPage() {
                             {category.playerProfiles && category.playerProfiles.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {category.playerProfiles.map((player) => (
-                                        <div 
-                                            key={player.id} 
+                                        <div
+                                            key={player.id}
                                             className="flex items-center space-x-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
                                             onClick={() => {
                                                 const userId = player.user?.id || player.userId;
@@ -206,14 +209,14 @@ export default function CategoryDetailsPage() {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                
+
                 <TabsContent value="matches" className="mt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {matches.length > 0 ? (
                             matches.map(match => (
-                                <MatchCard 
-                                    key={match.id} 
-                                    match={match} 
+                                <MatchCard
+                                    key={match.id}
+                                    match={match}
                                 />
                             ))
                         ) : (

@@ -32,10 +32,10 @@ export function EventCard({ event, onClick, isAdminOrCoach, onEdit, onDelete }: 
             default: return type;
         }
     };
-const isPastEvent = new Date(event.date_time) < new Date();
+    const isPastEvent = new Date(event.date_time) < new Date();
 
     return (
-        <Card 
+        <Card
             className="group hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-primary relative"
             onClick={onClick}
         >
@@ -51,14 +51,16 @@ const isPastEvent = new Date(event.date_time) < new Date();
                     </Button>
                 </div>
             )}
-            
+
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1 flex-1 min-w-0">
                         <Badge variant={getBadgeVariant(event.type)} className="mb-1">
                             {getTypeName(event.type)}
                         </Badge>
-                        <CardTitle className="text-lg leading-tight break-words">{event.name}</CardTitle>
+                        <CardTitle className="text-lg leading-tight line-clamp-2 break-words" title={event.name}>
+                            {event.name}
+                        </CardTitle>
                     </div>
                     <div className="text-center bg-muted/30 p-2 rounded-md min-w-[60px] shrink-0">
                         <span className="block text-xs font-bold uppercase text-muted-foreground">

@@ -116,7 +116,7 @@ const getMatchById = async (matchId) => {
     const match = await prisma.match.findUnique({
         where: { id },
         include: {
-            event: { select: { name: true } },
+            event: { select: { name: true, date_time: true } },
             homeCategory: { select: { name: true } },
             awayCategory: { select: { name: true } },
             winnerCategory: { select: { name: true } },
