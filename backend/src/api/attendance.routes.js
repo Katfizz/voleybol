@@ -33,4 +33,11 @@ router.delete(
     attendanceController.deleteAttendance
 );
 
+// GET /api/attendance/report/category/:categoryId
+router.get(
+    '/report/category/:categoryId',
+    hasRole(Role.ADMIN, Role.COACH),
+    attendanceController.getAttendanceReport
+);
+
 module.exports = router;

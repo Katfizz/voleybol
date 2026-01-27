@@ -6,19 +6,19 @@ import { type User } from "@/types/user.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 
 type StatValues = {
@@ -46,8 +46,8 @@ interface MatchStatisticsDialogProps {
     onSubmit: (data: CreateStatisticDTO) => Promise<void>;
 }
 
-export function MatchStatisticsDialog({ 
-    open, onOpenChange, homePlayers, awayPlayers, homeTeamName, awayTeamName, existingStats, onSubmit 
+export function MatchStatisticsDialog({
+    open, onOpenChange, homePlayers, awayPlayers, homeTeamName, awayTeamName, existingStats, onSubmit
 }: MatchStatisticsDialogProps) {
     const [activeTab, setActiveTab] = useState<'home' | 'away'>('home');
     const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<MatchStatsFormValues>();
@@ -105,19 +105,21 @@ export function MatchStatisticsDialog({
                 </DialogHeader>
 
                 <div className="flex gap-2 mb-4">
-                    <Button 
-                        variant={activeTab === 'home' ? "default" : "outline"} 
+                    <Button
+                        variant={activeTab === 'home' ? "default" : "outline"}
                         onClick={() => setActiveTab('home')}
-                        className="flex-1"
+                        className="flex-1 truncate block"
+                        title={homeTeamName}
                     >
-                        {homeTeamName}
+                        <span className="truncate block">{homeTeamName}</span>
                     </Button>
-                    <Button 
-                        variant={activeTab === 'away' ? "default" : "outline"} 
+                    <Button
+                        variant={activeTab === 'away' ? "default" : "outline"}
                         onClick={() => setActiveTab('away')}
-                        className="flex-1"
+                        className="flex-1 truncate block"
+                        title={awayTeamName}
                     >
-                        {awayTeamName}
+                        <span className="truncate block">{awayTeamName}</span>
                     </Button>
                 </div>
 

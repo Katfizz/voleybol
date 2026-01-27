@@ -26,3 +26,25 @@ export interface CreateAttendanceDTO {
     date: string;
     attendances: AttendanceRecord[];
 }
+
+export interface PlayerAttendanceReport {
+    player_id: number;
+    full_name: string;
+    position: string;
+    stats: {
+        present: number;
+        absent: number;
+        excused: number;
+        total: number;
+        rate: number;
+    };
+}
+
+export interface AttendanceReport {
+    category: {
+        id: number;
+        name: string;
+        total_events: number;
+    };
+    players: PlayerAttendanceReport[];
+}

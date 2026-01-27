@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Users, Activity, TrendingUp, TrendingDown, UserCog } from "lucide-react";
+import { ArrowLeft, Trophy, Users, Activity, TrendingUp, TrendingDown, UserCog, BarChart2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from '../context/AuthContext';
 
 import { categoryService } from '../services/category.service';
 import { matchService } from '../services/match.service';
@@ -15,8 +16,10 @@ import { MatchCard } from '../components/matches/MatchCard';
 import { TeamPerformanceChart } from '../components/categories/TeamPerformanceChart';
 
 export default function CategoryDetailsPage() {
+    const { user } = useAuth();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const isAdminOrCoach = user?.role === 'ADMIN' || user?.role === 'COACH';
     const [category, setCategory] = useState<Category | null>(null);
     const [matches, setMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
@@ -80,11 +83,18 @@ export default function CategoryDetailsPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Volver a equipos
             </Button>
 
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
-                    <Trophy className="h-8 w-8" /> {category.name}
-                </h1>
-                <p className="text-muted-foreground mt-2">{category.description || "Sin descripción"}</p>
+            <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
+                        <Trophy className="h-8 w-8" /> {category.name}
+                    </h1>
+                    <p className="text-muted-foreground mt-2">{category.description || "Sin descripción"}</p>
+                </div>
+                {isAdminOrCoach && (
+                    <Button variant="outline" onClick={() => navigate(`/reports/attendance`)} className="gap-2">
+                        <BarChart2 className="h-4 w-4" /> Reporte de Asistencia
+                    </Button>
+                )}
             </div>
 
             {/* Tarjetas de Estadísticas */}

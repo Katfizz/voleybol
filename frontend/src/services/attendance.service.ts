@@ -1,5 +1,5 @@
 import api from '../api/axios';
-import type { Attendance, CreateAttendanceDTO } from '../types/attendance.types';
+import type { Attendance, CreateAttendanceDTO, AttendanceReport } from '../types/attendance.types';
 
 export const attendanceService = {
     getByEvent: async (eventId: number, date?: string) => {
@@ -15,5 +15,9 @@ export const attendanceService = {
     delete: async (id: number) => {
         const response = await api.delete<{ ok: boolean; msg: string }>(`/attendance/${id}`);
         return response.data;
+    },
+    getReport: async (categoryId: number) => {
+        const response = await api.get<{ ok: boolean; report: AttendanceReport }>(`/attendance/report/category/${categoryId}`);
+        return response.data.report;
     }
 };

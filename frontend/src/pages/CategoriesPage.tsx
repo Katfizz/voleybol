@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm, type SubmitHandler } from 'react-hook-form';
-import { Search, Plus, Trophy } from "lucide-react";
+import { Search, Plus, Trophy, BarChart2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { categoryService } from '../services/category.service';
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function CategoriesPage() {
+    const navigate = useNavigate();
     const { user: currentUser } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
     const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
@@ -169,9 +171,16 @@ export default function CategoriesPage() {
     return (
         <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <h2 className="text-3xl font-bold text-primary flex items-center gap-2">
-                    <Trophy className="h-8 w-8" /> Equipos y Categorías
-                </h2>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <h2 className="text-3xl font-bold text-primary flex items-center gap-2">
+                        <Trophy className="h-8 w-8" /> Equipos y Categorías
+                    </h2>
+                    {isAdminOrCoach && (
+                        <Button variant="outline" size="sm" onClick={() => navigate('/reports/attendance')} className="gap-2">
+                            <BarChart2 className="h-4 w-4" /> Reportes de Asistencia
+                        </Button>
+                    )}
+                </div>
 
                 {/* Buscador */}
                 <div className="w-full md:w-1/3">

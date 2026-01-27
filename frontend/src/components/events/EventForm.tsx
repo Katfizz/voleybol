@@ -221,7 +221,7 @@ export function EventForm({
                                                             }}
                                                         />
                                                     </FormControl>
-                                                    <FormLabel className="font-normal cursor-pointer">
+                                                    <FormLabel className="font-normal cursor-pointer truncate max-w-[150px]" title={category.name}>
                                                         {category.name}
                                                     </FormLabel>
                                                 </FormItem>

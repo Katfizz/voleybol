@@ -47,8 +47,22 @@ const deleteAttendance = async (req, res, next) => {
     }
 };
 
+/**
+ * Obtiene un reporte de asistencia por categoría.
+ */
+const getAttendanceReport = async (req, res, next) => {
+    try {
+        const { categoryId } = req.params;
+        const report = await attendanceService.getCategoryAttendanceReport(categoryId);
+        res.status(200).json({ ok: true, report });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     recordAttendance,
     getAttendance,
-    deleteAttendance
+    deleteAttendance,
+    getAttendanceReport
 };

@@ -90,7 +90,7 @@ export function EventCard({ event, onClick, isAdminOrCoach, onEdit, onDelete }: 
                 {event.categories && event.categories.length > 0 && (
                     <div className="flex items-center gap-2 mt-1">
                         <Users className="h-4 w-4" />
-                        <span className="truncate">
+                        <span className="truncate" title={event.categories.map(c => c.name).join(", ")}>
                             {event.categories.map(c => c.name).join(", ")}
                         </span>
                     </div>

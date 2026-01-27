@@ -1,14 +1,14 @@
-import { Home, User, Users, Trophy, LogOut, CalendarDays } from "lucide-react"
+import { Home, User, Users, Trophy, LogOut, CalendarDays, BarChart2 } from "lucide-react"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
+    Sidebar,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarFooter,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/context/AuthContext"
 import { Link, useLocation } from "react-router-dom"
@@ -16,7 +16,7 @@ import { Link, useLocation } from "react-router-dom"
 export function AppSidebar() {
     const { user, logout } = useAuth();
     const location = useLocation();
-    
+
     const items = [
         { title: "Inicio", url: "/", icon: Home },
         { title: "Perfil", url: "/profile", icon: User },
@@ -26,6 +26,7 @@ export function AppSidebar() {
 
     if (user?.role === 'ADMIN' || user?.role === 'COACH') {
         items.push({ title: "Usuarios", url: "/users", icon: Users })
+        items.push({ title: "Reportes", url: "/reports/attendance", icon: BarChart2 })
     }
 
     return (

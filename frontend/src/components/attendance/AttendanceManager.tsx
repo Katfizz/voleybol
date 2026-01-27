@@ -52,11 +52,11 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
         try {
             // Asumimos que el servicio acepta un parámetro de fecha opcional
             const response = await attendanceService.getByEvent(eventId, selectedDate) as { attendance?: AttendanceRecord[] } | AttendanceRecord[];
-            
+
             const map: Record<number, AttendanceRecord> = {};
             // La respuesta puede venir como { attendance: [...] } o directamente el array
             let records: AttendanceRecord[] = [];
-            
+
             if ('attendance' in response && Array.isArray(response.attendance)) {
                 records = response.attendance;
             } else if (Array.isArray(response)) {
@@ -65,14 +65,14 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
 
             setHasExistingData(records.length > 0);
             setExistingRecords(records);
-            
+
             records.forEach((record) => {
-                    map[record.player_profile_id] = {
-                        player_profile_id: record.player_profile_id,
-                        status: record.status,
-                        notes: record.notes
-                    };
-                });
+                map[record.player_profile_id] = {
+                    player_profile_id: record.player_profile_id,
+                    status: record.status,
+                    notes: record.notes
+                };
+            });
             setAttendanceMap(map);
         } catch (error) {
             console.error(error);
@@ -175,191 +175,192 @@ export function AttendanceManager({ eventId, eventDate, categories, isAdminOrCoa
 
     return (
         <>
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" className="w-full md:w-auto gap-2">
-                    <Users className="h-4 w-4" />
-                    Gestionar Asistencia
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">
-                <DialogHeader className="p-6 pb-4 border-b">
-                    <DialogTitle className="text-2xl flex items-center gap-2">
-                        <Check className="h-6 w-6 text-primary" /> 
-                        Control de Asistencia
-                    </DialogTitle>
-                    <DialogDescription>
-                        Registra la asistencia por equipo. Selecciona la fecha correspondiente si el evento dura varios días.
-                    </DialogDescription>
-                </DialogHeader>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full md:w-auto gap-2">
+                        <Users className="h-4 w-4" />
+                        Gestionar Asistencia
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">
+                    <DialogHeader className="p-6 pb-4 border-b">
+                        <DialogTitle className="text-2xl flex items-center gap-2">
+                            <Check className="h-6 w-6 text-primary" />
+                            Control de Asistencia
+                        </DialogTitle>
+                        <DialogDescription>
+                            Registra la asistencia por equipo. Selecciona la fecha correspondiente si el evento dura varios días.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <div className="px-6 py-4 bg-muted/30 flex flex-col sm:flex-row sm:items-center gap-4 border-b">
-                    <div className="flex items-center gap-3">
-                        <Label htmlFor="attendance-date" className="font-medium whitespace-nowrap">Fecha de Asistencia:</Label>
-                        <div className="relative">
-                            <Input 
-                                id="attendance-date"
-                                type="date" 
-                                value={selectedDate} 
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                className="w-auto pl-10"
-                            />
-                            <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        </div>
-                    </div>
-                    {!hasPlayers && (
-                        <div className="flex items-center gap-2 text-amber-600 text-sm bg-amber-50 px-3 py-1 rounded-md border border-amber-200">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>No hay jugadores asignados a los equipos de este evento.</span>
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex-1 overflow-hidden bg-background">
-                    {categories.length > 0 ? (
-                        <Tabs defaultValue={categories[0].id.toString()} className="h-full flex flex-col">
-                            <div className="px-6 pt-4 pb-2 border-b">
-                                <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 gap-2 flex-wrap">
-                                    {categories.map(category => (
-                                        <TabsTrigger 
-                                            key={category.id} 
-                                            value={category.id.toString()}
-                                            className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
-                                        >
-                                            {category.name}
-                                            <Badge variant="secondary" className="ml-2 text-xs">
-                                                {category.playerProfiles?.length || 0}
-                                            </Badge>
-                                        </TabsTrigger>
-                                    ))}
-                                </TabsList>
+                    <div className="px-6 py-4 bg-muted/30 flex flex-col sm:flex-row sm:items-center gap-4 border-b">
+                        <div className="flex items-center gap-3">
+                            <Label htmlFor="attendance-date" className="font-medium whitespace-nowrap">Fecha de Asistencia:</Label>
+                            <div className="relative">
+                                <Input
+                                    id="attendance-date"
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    className="w-auto pl-10"
+                                />
+                                <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                             </div>
+                        </div>
+                        {!hasPlayers && (
+                            <div className="flex items-center gap-2 text-amber-600 text-sm bg-amber-50 px-3 py-1 rounded-md border border-amber-200">
+                                <AlertCircle className="h-4 w-4" />
+                                <span>No hay jugadores asignados a los equipos de este evento.</span>
+                            </div>
+                        )}
+                    </div>
 
-                            {categories.map(category => (
-                                <TabsContent key={category.id} value={category.id.toString()} className="flex-1 overflow-hidden mt-0 p-0">
-                                    <ScrollArea className="h-full">
-                                        <div className="p-6 space-y-3">
-                                            {category.playerProfiles && category.playerProfiles.length > 0 ? (
-                                                category.playerProfiles.map(player => {
-                                                    const status = attendanceMap[player.id]?.status;
-                                                    return (
-                                                        <div key={player.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors group gap-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <Avatar className="h-10 w-10 border">
-                                                                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                                                                        {getInitials(player.full_name)}
-                                                                    </AvatarFallback>
-                                                                </Avatar>
-                                                                <div>
-                                                                    <p className="font-medium leading-none">{player.full_name}</p>
-                                                                    <p className="text-xs text-muted-foreground mt-1">{player.position || "Sin posición"}</p>
+                    <div className="flex-1 overflow-hidden bg-background">
+                        {categories.length > 0 ? (
+                            <Tabs defaultValue={categories[0].id.toString()} className="h-full flex flex-col">
+                                <div className="px-6 pt-4 pb-2 border-b">
+                                    <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 gap-2 flex-wrap">
+                                        {categories.map(category => (
+                                            <TabsTrigger
+                                                key={category.id}
+                                                value={category.id.toString()}
+                                                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2 max-w-[180px] truncate"
+                                                title={category.name}
+                                            >
+                                                <span className="truncate">{category.name}</span>
+                                                <Badge variant="secondary" className="ml-2 text-xs shrink-0">
+                                                    {category.playerProfiles?.length || 0}
+                                                </Badge>
+                                            </TabsTrigger>
+                                        ))}
+                                    </TabsList>
+                                </div>
+
+                                {categories.map(category => (
+                                    <TabsContent key={category.id} value={category.id.toString()} className="flex-1 overflow-hidden mt-0 p-0">
+                                        <ScrollArea className="h-full">
+                                            <div className="p-6 space-y-3">
+                                                {category.playerProfiles && category.playerProfiles.length > 0 ? (
+                                                    category.playerProfiles.map(player => {
+                                                        const status = attendanceMap[player.id]?.status;
+                                                        return (
+                                                            <div key={player.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/30 transition-colors group gap-3">
+                                                                <div className="flex items-center gap-3">
+                                                                    <Avatar className="h-10 w-10 border">
+                                                                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                                                                            {getInitials(player.full_name)}
+                                                                        </AvatarFallback>
+                                                                    </Avatar>
+                                                                    <div>
+                                                                        <p className="font-medium leading-none">{player.full_name}</p>
+                                                                        <p className="text-xs text-muted-foreground mt-1">{player.position || "Sin posición"}</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                                                    <Input
+                                                                        placeholder="Notas..."
+                                                                        value={attendanceMap[player.id]?.notes || ""}
+                                                                        onChange={(e) => handleNotesChange(player.id, e.target.value)}
+                                                                        className="h-9 flex-1 sm:w-[180px]"
+                                                                    />
+                                                                    <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border shrink-0">
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant={status === 'PRESENT' ? 'default' : 'ghost'}
+                                                                            className={cn("h-8 px-3 transition-all", status === 'PRESENT' ? "bg-green-600 hover:bg-green-700 text-white shadow-sm" : "hover:bg-green-100 hover:text-green-700")}
+                                                                            onClick={() => handleStatusChange(player.id, 'PRESENT')}
+                                                                            title="Presente"
+                                                                        >
+                                                                            <Check className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Presente</span>
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant={status === 'ABSENT' ? 'destructive' : 'ghost'}
+                                                                            className={cn("h-8 px-3 transition-all", status === 'ABSENT' ? "shadow-sm" : "hover:bg-red-100 hover:text-red-700")}
+                                                                            onClick={() => handleStatusChange(player.id, 'ABSENT')}
+                                                                            title="Ausente"
+                                                                        >
+                                                                            <X className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Ausente</span>
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant={status === 'EXCUSED' ? 'secondary' : 'ghost'}
+                                                                            className={cn("h-8 px-3 transition-all", status === 'EXCUSED' ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200 shadow-sm" : "hover:bg-yellow-50 hover:text-yellow-700")}
+                                                                            onClick={() => handleStatusChange(player.id, 'EXCUSED')}
+                                                                            title="Justificado"
+                                                                        >
+                                                                            <Clock className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Justif.</span>
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            
-                                                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                                                <Input 
-                                                                    placeholder="Notas..."
-                                                                    value={attendanceMap[player.id]?.notes || ""}
-                                                                    onChange={(e) => handleNotesChange(player.id, e.target.value)}
-                                                                    className="h-9 flex-1 sm:w-[180px]"
-                                                                />
-                                                                <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border shrink-0">
-                                                                <Button 
-                                                                    size="sm" 
-                                                                    variant={status === 'PRESENT' ? 'default' : 'ghost'}
-                                                                    className={cn("h-8 px-3 transition-all", status === 'PRESENT' ? "bg-green-600 hover:bg-green-700 text-white shadow-sm" : "hover:bg-green-100 hover:text-green-700")}
-                                                                    onClick={() => handleStatusChange(player.id, 'PRESENT')}
-                                                                    title="Presente"
-                                                                >
-                                                                    <Check className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Presente</span>
-                                                                </Button>
-                                                                <Button 
-                                                                    size="sm" 
-                                                                    variant={status === 'ABSENT' ? 'destructive' : 'ghost'}
-                                                                    className={cn("h-8 px-3 transition-all", status === 'ABSENT' ? "shadow-sm" : "hover:bg-red-100 hover:text-red-700")}
-                                                                    onClick={() => handleStatusChange(player.id, 'ABSENT')}
-                                                                    title="Ausente"
-                                                                >
-                                                                    <X className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Ausente</span>
-                                                                </Button>
-                                                                <Button 
-                                                                    size="sm" 
-                                                                    variant={status === 'EXCUSED' ? 'secondary' : 'ghost'}
-                                                                    className={cn("h-8 px-3 transition-all", status === 'EXCUSED' ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200 shadow-sm" : "hover:bg-yellow-50 hover:text-yellow-700")}
-                                                                    onClick={() => handleStatusChange(player.id, 'EXCUSED')}
-                                                                    title="Justificado"
-                                                                >
-                                                                    <Clock className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Justif.</span>
-                                                                </Button>
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground bg-muted/10 rounded-lg border border-dashed">
-                                                    <Users className="h-10 w-10 mb-2 opacity-20" />
-                                                    <p>No hay jugadores asignados a este equipo.</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </ScrollArea>
-                                </TabsContent>
-                            ))}
-                        </Tabs>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                            <AlertCircle className="h-12 w-12 mb-4 opacity-20" />
-                            <p>Este evento no tiene equipos asignados.</p>
-                        </div>
-                    )}
-                </div>
-
-                <DialogFooter className="p-4 border-t bg-muted/10">
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveClick} disabled={loading} className="min-w-[140px]">
-                        {loading ? (
-                            <>Guardando...</>
+                                                        );
+                                                    })
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground bg-muted/10 rounded-lg border border-dashed">
+                                                        <Users className="h-10 w-10 mb-2 opacity-20" />
+                                                        <p>No hay jugadores asignados a este equipo.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </ScrollArea>
+                                    </TabsContent>
+                                ))}
+                            </Tabs>
                         ) : (
-                            <>
-                                <Save className="mr-2 h-4 w-4" /> Guardar Cambios
-                            </>
+                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                                <AlertCircle className="h-12 w-12 mb-4 opacity-20" />
+                                <p>Este evento no tiene equipos asignados.</p>
+                            </div>
                         )}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    </div>
 
-        <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Asistencia ya registrada</DialogTitle>
-                    <DialogDescription>
-                        Ya existe un registro de asistencia para esta fecha. ¿Desea sobrescribirlo con la nueva información?
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="text-sm bg-muted/50 p-3 rounded-md border">
-                    <p className="font-semibold mb-2">Registros actuales ({existingRecords.length}):</p>
-                    <ul className="list-disc pl-4 space-y-1 max-h-[150px] overflow-y-auto">
-                        {existingRecords.map(rec => {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const record = rec as any;
-                            const name = record.player_profile?.full_name || "Jugador";
-                            const statusMap: Record<string, string> = { PRESENT: 'Presente', ABSENT: 'Ausente', EXCUSED: 'Justificado' };
-                            return (
-                                <li key={record.id} className="text-muted-foreground">
-                                    <span className="font-medium text-foreground">{name}</span>: {statusMap[record.status] || record.status}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsConfirmOpen(false)}>Cancelar</Button>
-                    <Button onClick={executeSave}>Sobrescribir</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    <DialogFooter className="p-4 border-t bg-muted/10">
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSaveClick} disabled={loading} className="min-w-[140px]">
+                            {loading ? (
+                                <>Guardando...</>
+                            ) : (
+                                <>
+                                    <Save className="mr-2 h-4 w-4" /> Guardar Cambios
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Asistencia ya registrada</DialogTitle>
+                        <DialogDescription>
+                            Ya existe un registro de asistencia para esta fecha. ¿Desea sobrescribirlo con la nueva información?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="text-sm bg-muted/50 p-3 rounded-md border">
+                        <p className="font-semibold mb-2">Registros actuales ({existingRecords.length}):</p>
+                        <ul className="list-disc pl-4 space-y-1 max-h-[150px] overflow-y-auto">
+                            {existingRecords.map(rec => {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                const record = rec as any;
+                                const name = record.player_profile?.full_name || "Jugador";
+                                const statusMap: Record<string, string> = { PRESENT: 'Presente', ABSENT: 'Ausente', EXCUSED: 'Justificado' };
+                                return (
+                                    <li key={record.id} className="text-muted-foreground">
+                                        <span className="font-medium text-foreground">{name}</span>: {statusMap[record.status] || record.status}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsConfirmOpen(false)}>Cancelar</Button>
+                        <Button onClick={executeSave}>Sobrescribir</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

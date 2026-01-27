@@ -131,9 +131,9 @@ export default function EventDetailsPage() {
                     {event.categories && event.categories.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-6">
                             {event.categories.map(category => (
-                                <Badge key={category.id} variant="secondary" className="text-sm px-3 py-1">
-                                    <Users className="mr-2 h-3 w-3" />
-                                    {category.name}
+                                <Badge key={category.id} variant="secondary" className="text-sm px-3 py-1 max-w-[200px] truncate" title={category.name}>
+                                    <Users className="mr-2 h-3 w-3 shrink-0" />
+                                    <span className="truncate">{category.name}</span>
                                 </Badge>
                             ))}
                         </div>
