@@ -53,34 +53,14 @@ export default function AttendanceReportsPage() {
         }
     }, [selectedCategoryId, loadReport]);
 
-    const exportToCSV = () => {
+    const exportToExcel = async () => {
         if (!report) return;
-
-        const headers = ["Jugador", "Posición", "Presentes", "Ausentes", "Justificados", "Total Eventos", "Efectividad %"];
-        const rows = report.players.map(p => [
-            p.full_name,
-            p.position || "-",
-            p.stats.present,
-            p.stats.absent,
-            p.stats.excused,
-            report.category.total_events,
-            p.stats.rate
-        ]);
-
-        const csvContent = [
-            headers.join(","),
-            ...rows.map(e => e.join(","))
-        ].join("\n");
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `reporte_asistencia_${report.category.name.replace(/\s+/g, '_')}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        try {
+            await attendanceService.downloadReportExcel(report.category.id, report.category.name);
+            toast.success('Reporte Excel generado correctamente');
+        } catch {
+            toast.error('Error al generar el reporte Excel');
+        }
     };
 
     if (loading) return <div className="p-8 text-center">Cargando...</div>;
@@ -109,7 +89,7 @@ export default function AttendanceReportsPage() {
                         </SelectContent>
                     </Select>
                     {report && (
-                        <Button variant="outline" onClick={exportToCSV} className="shrink-0">
+                        <Button variant="outline" onClick={exportToExcel} className="shrink-0">
                             <Download className="h-4 w-4 mr-2" /> <span className="hidden sm:inline">Exportar</span>
                         </Button>
                     )}

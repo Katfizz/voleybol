@@ -19,5 +19,19 @@ export const attendanceService = {
     getReport: async (categoryId: number) => {
         const response = await api.get<{ ok: boolean; report: AttendanceReport }>(`/attendance/report/category/${categoryId}`);
         return response.data.report;
+    },
+    downloadReportExcel: async (categoryId: number, categoryName: string) => {
+        const response = await api.get(`/attendance/report/category/${categoryId}/excel`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `reporte_asistencia_${categoryName.replace(/\s+/g, '_')}.xlsx`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
     }
 };

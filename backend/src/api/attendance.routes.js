@@ -40,4 +40,11 @@ router.get(
     attendanceController.getAttendanceReport
 );
 
+// GET /api/attendance/report/category/:categoryId/excel
+router.get(
+    '/report/category/:categoryId/excel',
+    hasRole(Role.ADMIN, Role.COACH),
+    attendanceController.exportAttendanceToExcel
+);
+
 module.exports = router;
