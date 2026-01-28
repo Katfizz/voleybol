@@ -1,5 +1,5 @@
 const { Role } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { ConflictError, UnauthorizedError, ForbiddenError, AppError } = require('../utils/errors');
 const prisma = require('../db/prisma');

@@ -152,8 +152,81 @@ const deleteAttendance = async (attendanceId) => {
     return prisma.attendance.delete({ where: { id } });
 };
 
+/**
+ * Genera un reporte resumido de asistencia para una categoría.
+ * @param {string} categoryId - ID de la categoría.
+ */
+const getCategoryAttendanceReport = async (categoryId) => {
+    const id = parseInt(categoryId, 10);
+
+    // 1. Obtener la categoría y sus jugadores
+    const category = await prisma.category.findUnique({
+        where: { id },
+        include: {
+            playerProfiles: {
+                select: {
+                    id: true,
+                    full_name: true,
+                    position: true
+                }
+            },
+            events: {
+                select: { id: true, name: true, type: true, date_time: true }
+            }
+        }
+    });
+
+    if (!category) {
+        throw new NotFoundError(`No se encontró la categoría con ID ${id}.`);
+    }
+
+    // 2. Obtener todas las asistencias registradas para esta categoría
+    const eventIds = category.events.map(e => e.id);
+    const attendances = await prisma.attendance.findMany({
+        where: {
+            event_id: { in: eventIds }
+        }
+    });
+
+    // 3. Procesar datos por jugador
+    const totalEvents = category.events.length;
+
+    const report = category.playerProfiles.map(player => {
+        const playerAttendances = attendances.filter(a => a.player_profile_id === player.id);
+        const present = playerAttendances.filter(a => a.status === 'PRESENT').length;
+        const absent = playerAttendances.filter(a => a.status === 'ABSENT').length;
+        const excused = playerAttendances.filter(a => a.status === 'EXCUSED').length;
+
+        const sessionsParticipated = present + excused; // Consideramos justificado como "cumplido" o al menos no falta
+        const attendanceRate = totalEvents > 0 ? Math.round((present / totalEvents) * 100) : 0;
+
+        return {
+            player_id: player.id,
+            full_name: player.full_name,
+            position: player.position,
+            stats: {
+                present,
+                absent,
+                excused,
+                total: playerAttendances.length, // Sesiones con registro
+                rate: attendanceRate
+            }
+        };
+    });
+
+    return {
+        category: {
+            id: category.id,
+            name: category.name,
+            total_events: totalEvents
+        },
+        players: report
+    };
+};
+
 module.exports = {
     recordEventAttendance,
     getEventAttendance,
-    deleteAttendance
+    deleteAttendance,
+    getCategoryAttendanceReport
 };
