@@ -105,7 +105,7 @@ export default function EventDetailsPage() {
                     <div className="flex justify-between items-start">
                         <div>
                             <Badge className="mb-2">{event.type}</Badge>
-                            <CardTitle className="text-3xl">{event.name}</CardTitle>
+                            <CardTitle className="text-3xl line-clamp-3 break-words" title={event.name}>{event.name}</CardTitle>
                         </div>
                         {isAdminOrCoach && (
                             <div className="flex gap-2">

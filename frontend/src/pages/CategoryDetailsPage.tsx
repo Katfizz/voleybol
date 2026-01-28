@@ -84,11 +84,12 @@ export default function CategoryDetailsPage() {
             </Button>
 
             <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
-                        <Trophy className="h-8 w-8" /> {category.name}
+                <div className="flex-1 min-w-0">
+                    <h1 className="text-3xl font-bold text-primary flex items-start gap-2" title={category.name}>
+                        <Trophy className="h-8 w-8 shrink-0 mt-0.5" />
+                        <span className="line-clamp-2 break-words">{category.name}</span>
                     </h1>
-                    <p className="text-muted-foreground mt-2">{category.description || "Sin descripción"}</p>
+                    <p className="text-muted-foreground mt-2 line-clamp-2 break-words">{category.description || "Sin descripción"}</p>
                 </div>
                 {isAdminOrCoach && (
                     <Button variant="outline" onClick={() => navigate(`/reports/attendance`)} className="gap-2">

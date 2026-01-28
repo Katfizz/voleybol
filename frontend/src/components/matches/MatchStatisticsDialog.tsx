@@ -99,62 +99,68 @@ export function MatchStatisticsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
+            <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                <DialogHeader className="p-6 pb-0">
                     <DialogTitle>Registrar Estadísticas</DialogTitle>
                 </DialogHeader>
 
-                <div className="flex gap-2 mb-4">
-                    <Button
-                        variant={activeTab === 'home' ? "default" : "outline"}
-                        onClick={() => setActiveTab('home')}
-                        className="flex-1 truncate block"
-                        title={homeTeamName}
-                    >
-                        <span className="truncate block">{homeTeamName}</span>
-                    </Button>
-                    <Button
-                        variant={activeTab === 'away' ? "default" : "outline"}
-                        onClick={() => setActiveTab('away')}
-                        className="flex-1 truncate block"
-                        title={awayTeamName}
-                    >
-                        <span className="truncate block">{awayTeamName}</span>
-                    </Button>
+                <div className="px-6 py-4">
+                    <div className="flex gap-2 mb-4 bg-muted/50 p-1 rounded-lg">
+                        <Button
+                            variant={activeTab === 'home' ? "default" : "ghost"}
+                            onClick={() => setActiveTab('home')}
+                            className="flex-1 truncate shadow-none rounded-md h-9"
+                            title={homeTeamName}
+                        >
+                            <span className="truncate block">{homeTeamName}</span>
+                        </Button>
+                        <Button
+                            variant={activeTab === 'away' ? "default" : "ghost"}
+                            onClick={() => setActiveTab('away')}
+                            className="flex-1 truncate shadow-none rounded-md h-9"
+                            title={awayTeamName}
+                        >
+                            <span className="truncate block">{awayTeamName}</span>
+                        </Button>
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit(onFormSubmit)}>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[200px]">Jugador</TableHead>
-                                <TableHead className="text-center">PTS</TableHead>
-                                <TableHead className="text-center">Kills</TableHead>
-                                <TableHead className="text-center">Blk</TableHead>
-                                <TableHead className="text-center">Ace</TableHead>
-                                <TableHead className="text-center">Ast</TableHead>
-                                <TableHead className="text-center">Dig</TableHead>
-                                <TableHead className="text-center">Err</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {currentPlayers.map(player => (
-                                <TableRow key={player.id}>
-                                    <TableCell className="font-medium">{player.profile?.full_name}</TableCell>
-                                    <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.points`)} /></TableCell>
-                                    <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.kills`)} /></TableCell>
-                                    <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.blocks`)} /></TableCell>
-                                    <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.aces`)} /></TableCell>
-                                    <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.assists`)} /></TableCell>
-                                    <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.digs`)} /></TableCell>
-                                    <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.errors`)} /></TableCell>
+                <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col flex-1 overflow-hidden">
+                    <div className="flex-1 overflow-auto px-6">
+                        <Table>
+                            <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
+                                <TableRow>
+                                    <TableHead className="w-[180px]">Jugador</TableHead>
+                                    <TableHead className="text-center w-20">PTS</TableHead>
+                                    <TableHead className="text-center w-20">Kills</TableHead>
+                                    <TableHead className="text-center w-20">Blk</TableHead>
+                                    <TableHead className="text-center w-20">Ace</TableHead>
+                                    <TableHead className="text-center w-20">Ast</TableHead>
+                                    <TableHead className="text-center w-20">Dig</TableHead>
+                                    <TableHead className="text-center w-20">Err</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {currentPlayers.map(player => (
+                                    <TableRow key={player.id}>
+                                        <TableCell className="font-medium truncate max-w-[180px]" title={player.profile?.full_name}>
+                                            {player.profile?.full_name}
+                                        </TableCell>
+                                        <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.points`)} /></TableCell>
+                                        <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.kills`)} /></TableCell>
+                                        <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.blocks`)} /></TableCell>
+                                        <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.aces`)} /></TableCell>
+                                        <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.assists`)} /></TableCell>
+                                        <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.digs`)} /></TableCell>
+                                        <TableCell><Input type="number" min="0" className="w-16 h-8 text-center" {...register(`stats.${player.id}.errors`)} /></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
 
-                    <DialogFooter className="mt-6">
-                        <Button type="submit" disabled={isSubmitting}>
+                    <DialogFooter className="p-6 border-t bg-muted/5">
+                        <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             <Save className="mr-2 h-4 w-4" /> Guardar Estadísticas
                         </Button>

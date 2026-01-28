@@ -60,7 +60,7 @@ export function CategoryCard({
                 if (category.playerProfiles?.some(p => p.user?.id === user.id)) {
                     return false;
                 }
-                
+
                 // 2. Debe tener un perfil de jugador
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const profile = (user as any).profile;
@@ -81,12 +81,12 @@ export function CategoryCard({
         if (selectedPlayer) {
             const userId = parseInt(selectedPlayer);
             const user = availablePlayers.find(u => u.id === userId);
-            
-             if (user?.role === 'COACH' && onAssignCoach) { // Verificamos si onAssignCoach existe
+
+            if (user?.role === 'COACH' && onAssignCoach) { // Verificamos si onAssignCoach existe
                 if (onAssignCoach) onAssignCoach(category.id, userId);
             } else {
                 onAssignPlayer(category.id, userId);
-             }
+            }
             setSelectedPlayer("");
         }
     };
@@ -96,7 +96,7 @@ export function CategoryCard({
             "group relative transition-all duration-300 hover:shadow-lg hover:ring-1 hover:ring-primary/20 h-fit cursor-pointer",
             isSelectOpen ? "z-50 rounded-b-none" : "hover:z-50 hover:rounded-b-none"
         )}
-        onClick={() => navigate(`/categories/${category.id}`)}
+            onClick={() => navigate(`/categories/${category.id}`)}
         >
             <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
@@ -122,7 +122,7 @@ export function CategoryCard({
                     {category.description || "Sin descripción"}
                 </CardDescription>
             </CardHeader>
-            
+
             <CardContent>
                 <div className="flex items-center gap-2 mb-4 flex-wrap">
                     <Badge variant="secondary" className="flex gap-1 items-center">
@@ -144,13 +144,13 @@ export function CategoryCard({
                     "top-[calc(100%-1px)]",
                     isSelectOpen ? "max-h-[400px] py-4" : "max-h-0 py-0 group-hover:max-h-[400px] group-hover:py-4"
                 )}
-                onClick={(e) => e.stopPropagation()} // Evitar navegación al hacer clic en el área expandible
+                    onClick={(e) => e.stopPropagation()} // Evitar navegación al hacer clic en el área expandible
                 >
                     <div className="pt-2 border-t space-y-3">
-                        
+
                         {/* Lista de Jugadores con Scroll */}
                         <div className="max-h-[200px] overflow-y-auto pr-1 space-y-1 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-                            
+
                             {/* Sección de Entrenadores */}
                             {category.coaches && category.coaches.length > 0 && (
                                 <div className="mb-4">
@@ -158,8 +158,8 @@ export function CategoryCard({
                                         <UserCog className="h-3 w-3" /> Entrenadores
                                     </div>
                                     {category.coaches.map(coach => (
-                                        <div 
-                                            key={coach.id} 
+                                        <div
+                                            key={coach.id}
                                             className="flex justify-between items-center text-sm p-2 rounded-md bg-primary/5 border border-primary/10 mb-1"
                                         >
                                             <div className="flex flex-col">
@@ -167,9 +167,9 @@ export function CategoryCard({
                                                 <span className="text-[10px] text-muted-foreground">Coach</span>
                                             </div>
                                             {isAdminOrCoach && onRemoveCoach && (
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     className="h-6 w-6 text-muted-foreground hover:text-destructive"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -191,8 +191,8 @@ export function CategoryCard({
                                 </div>
                                 {category.playerProfiles && category.playerProfiles.length > 0 ? (
                                     category.playerProfiles.map(p => (
-                                        <div 
-                                            key={p.id} 
+                                        <div
+                                            key={p.id}
                                             className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/30 hover:bg-muted/60 transition-colors cursor-pointer"
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -205,9 +205,9 @@ export function CategoryCard({
                                                 <span className="text-xs text-muted-foreground">{p.position || 'N/A'}</span>
                                             </div>
                                             {isAdminOrCoach && (
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     className="h-6 w-6 text-muted-foreground hover:text-destructive"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -229,8 +229,8 @@ export function CategoryCard({
                         {/* Agregar Jugador */}
                         {isAdminOrCoach && (
                             <div className="flex gap-2 pt-2">
-                                <Select 
-                                    value={selectedPlayer} 
+                                <Select
+                                    value={selectedPlayer}
                                     onValueChange={setSelectedPlayer}
                                     onOpenChange={setIsSelectOpen}
                                 >
@@ -251,9 +251,9 @@ export function CategoryCard({
                                         )}
                                     </SelectContent>
                                 </Select>
-                                <Button 
-                                    size="icon" 
-                                    className="h-9 w-9 shrink-0" 
+                                <Button
+                                    size="icon"
+                                    className="h-9 w-9 shrink-0"
                                     onClick={handleAssign}
                                     disabled={!selectedPlayer}
                                 >
